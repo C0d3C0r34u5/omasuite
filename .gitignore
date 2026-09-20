@@ -6,6 +6,9 @@ pkg/
 *.o
 moc_*.cpp
 qrc_*.cpp
+Makefile
+moc_predefs.h
+/omasuite
 
 # Package output
 *.pkg.tar.*
