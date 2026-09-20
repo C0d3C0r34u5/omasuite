@@ -5,6 +5,10 @@ built with Qt Quick (QML) and C++.
 
 ![OmaSuite](icons/omasuite.svg)
 
+## Screenshot
+
+![OmaSuite main window](screenshots/main-window.png)
+
 ## Features
 
 - **Mail** — IMAP / SMTP (SSL/TLS) with message list, reading pane and compose.
