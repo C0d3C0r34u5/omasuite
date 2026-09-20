@@ -3,7 +3,7 @@
 An all-in-one mail, calendar, contacts and tasks suite for [Omarchy](https://omarchy.org),
 built with Qt Quick (QML) and C++.
 
-![Screenshot](icons/omasuite.svg)
+![OmaSuite](icons/omasuite.svg)
 
 ## Features
 
@@ -19,63 +19,163 @@ built with Qt Quick (QML) and C++.
   (GNOME Keyring / KWallet) via libsecret, never in plaintext. TLS certificates
   are verified by default.
 
-## Building
+---
 
-### From the AUR / source tarball
+## Compiling and running
+
+### Dependencies
+
+- `qt6-base` (provides `qmake6`, `moc`)
+- `qt6-declarative` (QML, Qt Quick, Qt Quick Controls 2)
+- `qt6-networkauth` (OAuth2)
+- `openssl` (TLS)
+- `libsecret` (keyring storage)
+- A C++17 compiler (`gcc` / `clang`) and `make`
+
+### On Arch / Omarchy (recommended)
+
+From the project directory, build and install the package:
 
 ```bash
 makepkg -si
 ```
 
-### Manually (developer build, installs to `~/.local`)
+This produces and installs an `omasuite` package. Launch it from your app menu,
+or run:
+
+```bash
+omasuite
+```
+
+### Manual developer build
+
+Build into `./build` and install to `~/.local`:
 
 ```bash
 ./install.sh
 ```
 
-Requires: `qt6-base`, `qt6-declarative`, `qt6-networkauth`, `openssl`, `libsecret`,
-plus a C++17 compiler and `qmake6`.
+Or, without installing, just compile and run from the build directory:
 
-## OAuth2 and the `client_id`
+```bash
+mkdir -p build && cd build
+qmake6 ../OmaSuite.pro
+make -j"$(nproc)"
+./omasuite
+```
 
-When you pick a Google account and choose "Sign in with OAuth2", OmaSuite opens
-your browser to Google's login page where you type your email and password, and
-Google asks your permission to allow the app to access your mail, calendar and
-contacts. **That part is exactly what you described.**
+### First run
 
-However, before that consent screen can appear, the app must identify itself to
-Google with a **`client_id`**. Google issues a `client_id` when someone registers
-the application in the [Google Cloud Console](https://console.cloud.google.com/).
-There is no universal, built-in `client_id` that works for everyone — it is unique
-to the registered app. The same applies to Microsoft and Yahoo.
+On first launch, OmaSuite shows a setup wizard. Add an account using either an
+**app password** or **OAuth2** (see below). You can add more accounts later from
+the "Add account" button in the sidebar.
 
-Because OmaSuite is open source and can't ship a secret tied to a specific
-registration, you have two options:
+Data is stored in `~/.local/share/Omarchy/OmaSuite/`; passwords and OAuth tokens
+live in your system keyring, not on disk in plaintext.
 
-1. **Ship a shared `client_id` (recommended for the project maintainer).**
-   Register a "Desktop app" OAuth client for your provider, then set the
-   `oauthClientId` field in `src/account/provider.cpp` (or enter it once in the
-   setup wizard's "OAuth client ID" field). End users then only ever see the
-   browser consent screen — no ID entry required. Use a loopback redirect URI
-   (e.g. `http://127.0.0.1`) and PKCE, so **no client secret is needed**.
+---
 
-2. **Let each user register their own app** and paste their `client_id` into the
-   setup wizard. More friction, but zero trust in a shared registration.
+## Setting up accounts
 
-### Registering a Google "Desktop app" client
+There are two ways to authenticate:
 
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/apis/credentials).
-2. Create a project, then **Create Credentials → OAuth client ID → Desktop app**.
-3. Copy the generated `client_id` (e.g. `1234567890-xxxx.apps.googleusercontent.com`).
-4. Enter it in the OmaSuite setup wizard (or bake it into `provider.cpp`).
+1. **App password (password)** — the simplest option. Generate an
+   "app-specific password" from your provider and paste it into the wizard.
+   Works for Gmail, Yahoo, Apple/iCloud, and any IMAP/SMTP server. **No client
+   ID needed.**
 
-For Microsoft, create an "Mobile and desktop applications" registration in
-[Azure App registrations](https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps)
-and set a loopback redirect URI.
+2. **OAuth2 (browser)** — signs you in through your provider's login page and
+   consent screen (no password is given to OmaSuite). This requires a
+   **`client_id`** that you register with the provider (see the next section).
 
-> **Apple/iCloud** does not provide public OAuth2 for mail/CalDAV/CardDAV. Use an
+> **Apple/iCloud** does not offer public OAuth2 for mail/CalDAV/CardDAV. Use an
 > [app-specific password](https://support.apple.com/HT204397) with the
-> "App password" option instead.
+> "App password" option.
+
+---
+
+## Getting your own OAuth `client_id`
+
+When you use the OAuth2 option, your browser opens the provider's login page,
+you sign in, and the provider asks your permission to grant OmaSuite access.
+**That consent screen cannot appear until the app identifies itself with a
+`client_id`** — a string the provider issues when *you* register an application
+in their developer portal.
+
+Because OmaSuite is open source and ships no secret, each user (or the project
+maintainer) registers their own client. There is **no charge** to register a
+client and use it in *testing mode* for yourself (up to ~100 test users per
+provider). OmaSuite uses **PKCE** with a loopback redirect
+(`http://localhost`, any port), so **no client secret is required**.
+
+Here's how to register a client for each provider.
+
+### Gmail (Google)
+
+1. Open the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a **project** (top-left project dropdown → *New Project*) and select it.
+3. Enable the required APIs (search for each, then click *Enable*):
+   - **Gmail API**
+   - **Google Calendar API**
+   - **People API** (this serves the contacts scope)
+4. Open **APIs & Services → OAuth consent screen** and configure:
+   - User type: **External**
+   - App name: `OmaSuite`, plus your support/developer email.
+   - Add scopes: `https://mail.google.com/`, `https://www.googleapis.com/auth/calendar`,
+     `https://www.googleapis.com/auth/contacts`.
+   - Under **Test users**, add your own Google account (and any friends you want
+     to grant access). In testing mode only test users can sign in.
+5. Open **APIs & Services → Credentials → Create Credentials → OAuth client ID**.
+6. Application type: **Desktop app**, name it `OmaSuite`, and create it.
+7. Copy the resulting **Client ID**, e.g.
+   `1234567890-xxxxxxxxxxxx.apps.googleusercontent.com`.
+8. Paste it into the OmaSuite wizard's **"OAuth client ID"** field when adding
+   the Gmail account (choose the OAuth2 option).
+
+> While in testing mode the consent screen shows an "unverified app" warning;
+> test users click *Advanced → Go to OmaSuite (unsafe)* once. Removing that
+> warning for the general public requires Google's app verification, and the
+> Gmail (restricted) scope additionally requires a paid security assessment.
+
+### Outlook / Microsoft 365
+
+1. Open the [Azure portal → App registrations](https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps).
+2. Click **New registration**:
+   - Name: `OmaSuite`
+   - Supported account types: **"Accounts in any organizational directory and
+     personal Microsoft accounts"** (or *Personal Microsoft accounts only* for
+     just outlook.com).
+   - Redirect URI: platform **Mobile and desktop applications**, value
+     `http://localhost`. *(OmaSuite listens on a random local port, and the
+     bare `http://localhost` registration covers any port.)*
+3. Click **Register**.
+4. Copy the **Application (client) ID**.
+5. *(Optional but recommended)* Under **API permissions**, add the delegated
+   permissions you plan to use, e.g. Microsoft Graph `Mail.ReadWrite`,
+   `Calendars.ReadWrite`, `Contacts.ReadWrite`, `Tasks.ReadWrite`, and — for
+   IMAP/SMTP/EWS OAuth — the "Office 365 Exchange Online" permissions
+   `IMAP.AccessAsUser.All`, `SMTP.Send`, `EWS.AccessAsUser.All`.
+6. Paste the client ID into the wizard when adding the Outlook/Exchange account.
+
+> Microsoft has no free-form "test user" list like Google; unverified personal
+> apps can sign in without admin consent, while work/school tenants may require
+> admin consent depending on policy.
+
+### Yahoo
+
+1. Open the [Yahoo Developer Network](https://developer.yahoo.com/) and create
+   an **app** for "Server-side / Client-side apps".
+2. Set the redirect URI to `http://localhost` (or your loopback URL).
+3. Choose the mail permissions you need (e.g. *Read/Write Mail*).
+4. Copy the **Client ID**.
+
+> **Note:** Yahoo's OAuth2 implementation requires a **client secret** in
+> addition to the client ID (unlike Google/Microsoft PKCE-only desktop clients).
+> OmaSuite's OAuth2 flow currently uses PKCE without a secret; Yahoo OAuth is
+> therefore the least-tested path. If it doesn't sign in, use a Yahoo
+> **app password** instead — that works without any registration.
+
+---
 
 ## License
 
