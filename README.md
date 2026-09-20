@@ -5,6 +5,29 @@ built with Qt Quick (QML) and C++.
 
 ![OmaSuite](icons/omasuite.svg)
 
+## Quick start
+
+```bash
+git clone https://github.com/C0d3C0r34u5/omasuite.git
+cd omasuite
+
+# Option A — package-managed install (recommended on Arch/Omarchy)
+makepkg -si
+
+# Option B — quick user-local install (builds and installs to ~/.local)
+./install.sh
+```
+
+Both fetch any missing build dependencies automatically:
+`makepkg -si` resolves them via pacman (`-s`), and `install.sh` checks for and
+installs them itself (prompting for `sudo` if needed).
+
+Then run:
+
+```bash
+omasuite
+```
+
 ## Screenshot
 
 ![OmaSuite main window](screenshots/main-window.png)
