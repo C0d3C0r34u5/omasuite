@@ -68,6 +68,7 @@ void AccountManager::load()
         if (a->authMethod().isEmpty())
             a->setAuthMethod(QStringLiteral("password"));
         a->setOauthClientId(q.value(QStringLiteral("oauth_client_id")).toString());
+        a->setOauthClientSecret(q.value(QStringLiteral("oauth_client_secret")).toString());
         a->setEwsUrl(q.value(QStringLiteral("ews_url")).toString());
         m_accounts.append(a);
 
@@ -104,12 +105,13 @@ QObject *AccountManager::addAccount(const QVariantMap &data)
     a->setAllowUntrusted(data.value(QStringLiteral("allowUntrusted")).toBool());
     a->setAuthMethod(data.value(QStringLiteral("authMethod"), QStringLiteral("password")).toString());
     a->setOauthClientId(data.value(QStringLiteral("oauthClientId")).toString());
+    a->setOauthClientSecret(data.value(QStringLiteral("oauthClientSecret")).toString());
     a->setEwsUrl(data.value(QStringLiteral("ewsUrl"), preset.value(QStringLiteral("ewsUrl"))).toString());
 
     QSqlQuery q(Database::instance()->connection());
     q.prepare(QStringLiteral(
-        "INSERT INTO accounts (name, email, provider, imap_host, imap_port, smtp_host, smtp_port, caldav_url, carddav_url, allow_untrusted, auth_method, oauth_client_id, ews_url) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"));
+        "INSERT INTO accounts (name, email, provider, imap_host, imap_port, smtp_host, smtp_port, caldav_url, carddav_url, allow_untrusted, auth_method, oauth_client_id, oauth_client_secret, ews_url) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"));
     q.addBindValue(a->name());
     q.addBindValue(a->email());
     q.addBindValue(a->provider());
@@ -122,6 +124,7 @@ QObject *AccountManager::addAccount(const QVariantMap &data)
     q.addBindValue(a->allowUntrusted() ? 1 : 0);
     q.addBindValue(a->authMethod());
     q.addBindValue(a->oauthClientId());
+    q.addBindValue(a->oauthClientSecret());
     q.addBindValue(a->ewsUrl());
 
     if (!q.exec()) {

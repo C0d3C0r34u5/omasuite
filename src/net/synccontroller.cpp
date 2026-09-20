@@ -67,10 +67,10 @@ bool SyncController::ensureToken(Account *a, std::function<void()> retry)
     m_retryAfterAuth = retry;
     if (m_oauth->hasTokens(a->email())) {
         setSyncing(true, QStringLiteral("Refreshing token..."));
-        m_oauth->refresh(a->provider(), a->email(), a->oauthClientId());
+        m_oauth->refresh(a->provider(), a->email(), a->oauthClientId(), a->oauthClientSecret());
     } else {
         setSyncing(true, QStringLiteral("Sign in required - check your browser"));
-        m_oauth->authorize(a->provider(), a->email(), a->oauthClientId());
+        m_oauth->authorize(a->provider(), a->email(), a->oauthClientId(), a->oauthClientSecret());
     }
     return false;
 }

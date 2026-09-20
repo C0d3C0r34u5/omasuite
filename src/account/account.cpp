@@ -113,6 +113,13 @@ void Account::setOauthClientId(const QString &v)
     emit oauthClientIdChanged();
 }
 
+void Account::setOauthClientSecret(const QString &v)
+{
+    if (m_oauthClientSecret == v) return;
+    m_oauthClientSecret = v;
+    emit oauthClientSecretChanged();
+}
+
 void Account::setEwsUrl(const QString &v)
 {
     if (m_ewsUrl == v) return;

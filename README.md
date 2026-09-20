@@ -167,13 +167,13 @@ Here's how to register a client for each provider.
    an **app** for "Server-side / Client-side apps".
 2. Set the redirect URI to `http://localhost` (or your loopback URL).
 3. Choose the mail permissions you need (e.g. *Read/Write Mail*).
-4. Copy the **Client ID**.
+4. Copy the **Client ID** *and* the **Client Secret**.
 
 > **Note:** Yahoo's OAuth2 implementation requires a **client secret** in
 > addition to the client ID (unlike Google/Microsoft PKCE-only desktop clients).
-> OmaSuite's OAuth2 flow currently uses PKCE without a secret; Yahoo OAuth is
-> therefore the least-tested path. If it doesn't sign in, use a Yahoo
-> **app password** instead — that works without any registration.
+> Paste the secret into the wizard's **"OAuth client secret"** field. OmaSuite
+> automatically switches from PKCE to a confidential client (secret) flow when
+> a secret is provided.
 
 ---
 

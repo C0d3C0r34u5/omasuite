@@ -306,6 +306,19 @@ Item {
                                     }
                                 }
 
+                                // OAuth client secret (only some providers, e.g. Yahoo)
+                                ColumnLayout { Layout.fillWidth: true; spacing: 4
+                                    visible: authMethodCombo.currentIndex === 1
+                                    Text { text: "OAuth client secret (optional)"; font.pixelSize: 12; color: "#444444" }
+                                    TextField {
+                                        id: oauthClientSecretField
+                                        Layout.fillWidth: true
+                                        echoMode: TextInput.Password
+                                        placeholderText: "Only required by some providers (e.g. Yahoo)"
+                                        font.pixelSize: 14
+                                    }
+                                }
+
                                 Text {
                                     id: oauthErrorText
                                     Layout.fillWidth: true
@@ -388,6 +401,7 @@ Item {
                                     allowUntrusted: allowUntrustedBox.checked,
                                     authMethod: authMethodCombo.currentIndex === 1 ? "oauth2" : "password",
                                     oauthClientId: oauthClientIdField.text,
+                                    oauthClientSecret: oauthClientSecretField.text,
                                     ewsUrl: ewsUrlField.text
                                 }
 
@@ -395,7 +409,7 @@ Item {
                                     wizard.waitingForOAuth = true
                                     wizard.pendingOAuthData = data
                                     oauthErrorText.visible = false
-                                    OAuth.authorize(wizard.selectedProvider.id, emailField.text, oauthClientIdField.text)
+                                    OAuth.authorize(wizard.selectedProvider.id, emailField.text, oauthClientIdField.text, oauthClientSecretField.text)
                                 } else {
                                     Accounts.addAccount(data)
                                     stack.push(donePage)

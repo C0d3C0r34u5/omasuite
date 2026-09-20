@@ -63,6 +63,7 @@ bool Database::createSchema()
             "allow_untrusted INTEGER DEFAULT 0,"
             "auth_method TEXT DEFAULT 'password',"
             "oauth_client_id TEXT DEFAULT '',"
+            "oauth_client_secret TEXT DEFAULT '',"
             "ews_url TEXT DEFAULT '',"
             "created_at TEXT DEFAULT (datetime('now'))"
             ")"),
@@ -171,6 +172,13 @@ bool Database::createSchema()
     if (q.lastError().isValid()) {
         QSqlQuery alt(m_db);
         alt.exec(QStringLiteral("ALTER TABLE accounts ADD COLUMN oauth_client_id TEXT DEFAULT ''"));
+    }
+
+    // Migration: add oauth_client_secret column if missing.
+    q.exec(QStringLiteral("SELECT oauth_client_secret FROM accounts LIMIT 1"));
+    if (q.lastError().isValid()) {
+        QSqlQuery alt(m_db);
+        alt.exec(QStringLiteral("ALTER TABLE accounts ADD COLUMN oauth_client_secret TEXT DEFAULT ''"));
     }
 
     // Migration: add ews_url column if missing.

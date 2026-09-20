@@ -63,21 +63,25 @@ void OAuth2Manager::authorize(Account *account)
 {
     if (!account)
         return;
-    authorize(account->provider(), account->email(), account->oauthClientId());
+    authorize(account->provider(), account->email(), account->oauthClientId(),
+              account->oauthClientSecret());
 }
 
-void OAuth2Manager::authorize(const QString &provider, const QString &email, const QString &clientId)
+void OAuth2Manager::authorize(const QString &provider, const QString &email,
+                              const QString &clientId, const QString &clientSecret)
 {
-    startFlow(provider, email, clientId, false);
+    startFlow(provider, email, clientId, clientSecret, false);
 }
 
-void OAuth2Manager::refresh(const QString &provider, const QString &email, const QString &clientId)
+void OAuth2Manager::refresh(const QString &provider, const QString &email,
+                            const QString &clientId, const QString &clientSecret)
 {
-    startFlow(provider, email, clientId, true);
+    startFlow(provider, email, clientId, clientSecret, true);
 }
 
 void OAuth2Manager::startFlow(const QString &provider, const QString &email,
-                              const QString &clientId, bool refreshOnly)
+                              const QString &clientId, const QString &clientSecret,
+                              bool refreshOnly)
 {
     const QVariantMap preset = Provider::preset(Provider::stringToType(provider));
     const QUrl authUrl(preset.value(QStringLiteral("authUrl")).toString());
@@ -107,7 +111,13 @@ void OAuth2Manager::startFlow(const QString &provider, const QString &email,
     m_flow->setAuthorizationUrl(authUrl);
     m_flow->setTokenUrl(tokenUrl);
     m_flow->setScope(scopes);
-    m_flow->setPkceMethod(QOAuth2AuthorizationCodeFlow::PkceMethod::S256);
+    if (clientSecret.isEmpty()) {
+        // Public client -> PKCE.
+        m_flow->setPkceMethod(QOAuth2AuthorizationCodeFlow::PkceMethod::S256);
+    } else {
+        // Confidential client -> client secret in the token exchange.
+        m_flow->setClientIdentifierSharedKey(clientSecret);
+    }
 
     m_handler = new QOAuthHttpServerReplyHandler(0, this);
     m_flow->setReplyHandler(m_handler);

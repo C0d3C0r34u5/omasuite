@@ -23,6 +23,7 @@ class Account : public QObject
     Q_PROPERTY(bool allowUntrusted READ allowUntrusted WRITE setAllowUntrusted NOTIFY allowUntrustedChanged)
     Q_PROPERTY(QString authMethod READ authMethod WRITE setAuthMethod NOTIFY authMethodChanged)
     Q_PROPERTY(QString oauthClientId READ oauthClientId WRITE setOauthClientId NOTIFY oauthClientIdChanged)
+    Q_PROPERTY(QString oauthClientSecret READ oauthClientSecret WRITE setOauthClientSecret NOTIFY oauthClientSecretChanged)
     Q_PROPERTY(QString ewsUrl READ ewsUrl WRITE setEwsUrl NOTIFY ewsUrlChanged)
     Q_PROPERTY(bool oauthReady READ oauthReady NOTIFY oauthReadyChanged)
     Q_PROPERTY(QString initials READ initials NOTIFY nameChanged)
@@ -75,6 +76,9 @@ public:
     QString oauthClientId() const { return m_oauthClientId; }
     void setOauthClientId(const QString &v);
 
+    QString oauthClientSecret() const { return m_oauthClientSecret; }
+    void setOauthClientSecret(const QString &v);
+
     QString ewsUrl() const { return m_ewsUrl; }
     void setEwsUrl(const QString &v);
 
@@ -98,6 +102,7 @@ signals:
     void allowUntrustedChanged();
     void authMethodChanged();
     void oauthClientIdChanged();
+    void oauthClientSecretChanged();
     void ewsUrlChanged();
     void oauthReadyChanged();
 
@@ -117,6 +122,7 @@ private:
     bool m_allowUntrusted = false;
     QString m_authMethod = QStringLiteral("password");
     QString m_oauthClientId;
+    QString m_oauthClientSecret;
     QString m_ewsUrl;
 };
 

@@ -18,9 +18,11 @@ public:
     QString refreshToken(const QString &email) const;
     void storeTokens(const QString &email, const QString &access, const QString &refresh);
 
-    void authorize(const QString &provider, const QString &email, const QString &clientId);
+    void authorize(const QString &provider, const QString &email, const QString &clientId,
+                   const QString &clientSecret = QString());
     void authorize(Account *account);
-    void refresh(const QString &provider, const QString &email, const QString &clientId);
+    void refresh(const QString &provider, const QString &email, const QString &clientId,
+                 const QString &clientSecret = QString());
 
 signals:
     void authorized(const QString &email);
@@ -28,7 +30,8 @@ signals:
     void failed(const QString &email, const QString &reason);
 
 private:
-    void startFlow(const QString &provider, const QString &email, const QString &clientId, bool refreshOnly);
+    void startFlow(const QString &provider, const QString &email, const QString &clientId,
+                   const QString &clientSecret, bool refreshOnly);
 
     QOAuth2AuthorizationCodeFlow *m_flow = nullptr;
     QOAuthHttpServerReplyHandler *m_handler = nullptr;
