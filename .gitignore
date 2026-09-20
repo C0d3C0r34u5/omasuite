@@ -1,0 +1,15 @@
+# Build artifacts
+build/
+build-pkg/
+pkg/
+.qmake.stash
+*.o
+moc_*.cpp
+qrc_*.cpp
+
+# Package output
+*.pkg.tar.*
+*.tar.zst
+
+# Misc
+*.user

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=OmaSuite
+GenericName=Mail, Calendar, Contacts and Tasks
+Comment=All-in-one personal information manager for Omarchy
+Exec=omasuite
+Icon=omasuite
+Terminal=false
+Categories=Office;Network;Email;Calendar;ContactManagement;PIM;
+Keywords=mail;email;calendar;contacts;tasks;todo;PIM;
+StartupWMClass=omasuite
+StartupNotify=true
