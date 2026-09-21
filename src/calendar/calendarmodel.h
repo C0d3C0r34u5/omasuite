@@ -7,6 +7,7 @@
 struct EventItem {
     int id = 0;
     int accountId = 0;
+    int calendarId = 0;
     QString uid;
     QString title;
     QString description;
@@ -26,6 +27,7 @@ public:
     enum Roles {
         IdRole = Qt::UserRole + 1,
         AccountIdRole,
+        CalendarIdRole,
         UidRole,
         TitleRole,
         DescriptionRole,
@@ -48,9 +50,9 @@ public:
     int count() const { return m_items.size(); }
 
     Q_INVOKABLE void reload();
-    Q_INVOKABLE int addEvent(int accountId, const QString &title, const QString &description,
+    Q_INVOKABLE int addEvent(int accountId, int calendarId, const QString &title, const QString &description,
                              const QString &location, qint64 start, qint64 end, bool allDay = false);
-    Q_INVOKABLE int addSynced(int accountId, const QString &uid, const QString &title,
+    Q_INVOKABLE int addSynced(int accountId, int calendarId, const QString &uid, const QString &title,
                               const QString &description, const QString &location,
                               qint64 start, qint64 end, bool allDay);
     Q_INVOKABLE bool hasUid(const QString &uid) const;

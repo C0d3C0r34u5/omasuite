@@ -64,13 +64,13 @@ static void seedSampleData(AppCore &core)
                                 QStringLiteral("Your flight QF123 is confirmed."),
                                 now - 4 * day, true, false);
 
-    core.calendarModel()->addSynced(acct, QStringLiteral("e1"), QStringLiteral("Design review"),
+    core.calendarModel()->addSynced(acct, 0, QStringLiteral("e1"), QStringLiteral("Design review"),
                                     QStringLiteral("Review the new sidebar mockups."), QStringLiteral("Meeting room 2"),
                                     now + 3600 * 1000, now + 2 * 3600 * 1000, false);
-    core.calendarModel()->addSynced(acct, QStringLiteral("e2"), QStringLiteral("Lunch with Sam"),
+    core.calendarModel()->addSynced(acct, 0, QStringLiteral("e2"), QStringLiteral("Lunch with Sam"),
                                     QString(), QStringLiteral("Cafe Lune"),
                                     now + 5 * 3600 * 1000, now + 6 * 3600 * 1000, false);
-    core.calendarModel()->addSynced(acct, QStringLiteral("e3"), QStringLiteral("Omarchy release day"),
+    core.calendarModel()->addSynced(acct, 0, QStringLiteral("e3"), QStringLiteral("Omarchy release day"),
                                     QString(), QString(),
                                     now + 2 * day, now + 3 * day, true);
 

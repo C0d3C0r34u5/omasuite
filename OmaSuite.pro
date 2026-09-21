@@ -23,6 +23,7 @@ SOURCES += \
     src/mail/imapclient.cpp \
     src/mail/smtpclient.cpp \
     src/calendar/calendarmodel.cpp \
+    src/calendar/calendarlistmodel.cpp \
     src/calendar/caldavclient.cpp \
     src/contacts/contactmodel.cpp \
     src/contacts/carddavclient.cpp \
@@ -46,6 +47,7 @@ HEADERS += \
     src/mail/imapclient.h \
     src/mail/smtpclient.h \
     src/calendar/calendarmodel.h \
+    src/calendar/calendarlistmodel.h \
     src/calendar/caldavclient.h \
     src/contacts/contactmodel.h \
     src/contacts/carddavclient.h \

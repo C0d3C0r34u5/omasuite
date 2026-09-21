@@ -27,6 +27,7 @@ QVariant CalendarModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case IdRole:        return it.id;
     case AccountIdRole: return it.accountId;
+    case CalendarIdRole: return it.calendarId;
     case UidRole:       return it.uid;
     case TitleRole:     return it.title;
     case DescriptionRole: return it.description;
@@ -48,6 +49,7 @@ QHash<int, QByteArray> CalendarModel::roleNames() const
     QHash<int, QByteArray> roles;
     roles[IdRole] = "id";
     roles[AccountIdRole] = "accountId";
+    roles[CalendarIdRole] = "calendarId";
     roles[UidRole] = "uid";
     roles[TitleRole] = "title";
     roles[DescriptionRole] = "description";
@@ -72,6 +74,7 @@ void CalendarModel::reload()
             EventItem it;
             it.id = q.value(QStringLiteral("id")).toInt();
             it.accountId = q.value(QStringLiteral("account_id")).toInt();
+            it.calendarId = q.value(QStringLiteral("calendar_id")).toInt();
             it.uid = q.value(QStringLiteral("uid")).toString();
             it.title = q.value(QStringLiteral("title")).toString();
             it.description = q.value(QStringLiteral("description")).toString();
@@ -90,14 +93,15 @@ void CalendarModel::reload()
     emit countChanged();
 }
 
-int CalendarModel::addEvent(int accountId, const QString &title, const QString &description,
+int CalendarModel::addEvent(int accountId, int calendarId, const QString &title, const QString &description,
                             const QString &location, qint64 start, qint64 end, bool allDay)
 {
     QSqlQuery q(Database::instance()->connection());
     q.prepare(QStringLiteral(
-        "INSERT INTO events (account_id, title, description, location, start, end, all_day) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?)"));
+        "INSERT INTO events (account_id, calendar_id, title, description, location, start, end, all_day) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"));
     q.addBindValue(accountId);
+    q.addBindValue(calendarId);
     q.addBindValue(title);
     q.addBindValue(description);
     q.addBindValue(location);
@@ -115,6 +119,7 @@ int CalendarModel::addEvent(int accountId, const QString &title, const QString &
     EventItem it;
     it.id = id;
     it.accountId = accountId;
+    it.calendarId = calendarId;
     it.title = title;
     it.description = description;
     it.location = location;
@@ -142,7 +147,7 @@ bool CalendarModel::hasUid(const QString &uid) const
     return false;
 }
 
-int CalendarModel::addSynced(int accountId, const QString &uid, const QString &title,
+int CalendarModel::addSynced(int accountId, int calendarId, const QString &uid, const QString &title,
                              const QString &description, const QString &location,
                              qint64 start, qint64 end, bool allDay)
 {
@@ -151,9 +156,10 @@ int CalendarModel::addSynced(int accountId, const QString &uid, const QString &t
 
     QSqlQuery q(Database::instance()->connection());
     q.prepare(QStringLiteral(
-        "INSERT INTO events (account_id, uid, title, description, location, start, end, all_day) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"));
+        "INSERT INTO events (account_id, calendar_id, uid, title, description, location, start, end, all_day) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"));
     q.addBindValue(accountId);
+    q.addBindValue(calendarId);
     q.addBindValue(uid);
     q.addBindValue(title);
     q.addBindValue(description);
@@ -172,6 +178,7 @@ int CalendarModel::addSynced(int accountId, const QString &uid, const QString &t
     EventItem it;
     it.id = id;
     it.accountId = accountId;
+    it.calendarId = calendarId;
     it.uid = uid;
     it.title = title;
     it.description = description;
@@ -220,6 +227,7 @@ QVariantList CalendarModel::eventsForDate(qint64 startOfDayMs) const
             QVariantMap m;
             m[QStringLiteral("id")] = it.id;
             m[QStringLiteral("uid")] = it.uid;
+            m[QStringLiteral("calendarId")] = it.calendarId;
             m[QStringLiteral("title")] = it.title;
             m[QStringLiteral("start")] = it.start;
             m[QStringLiteral("end")] = it.end;

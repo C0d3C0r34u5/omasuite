@@ -38,7 +38,9 @@ static QStringList blocks(const QString &text, const QString &type)
 static QVariantMap parseProperties(const QString &block)
 {
     QVariantMap props;
-    const QStringList lines = block.split(QStringLiteral("\r\n"), Qt::SkipEmptyParts);
+    QString normalized = block;
+    normalized.replace(QStringLiteral("\r\n"), QStringLiteral("\n"));
+    const QStringList lines = normalized.split(QLatin1Char('\n'), Qt::SkipEmptyParts);
     for (const QString &raw : lines) {
         QString line = raw.trimmed();
         if (line.startsWith(QStringLiteral("BEGIN:")) || line.startsWith(QStringLiteral("END:")))

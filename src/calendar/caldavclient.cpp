@@ -37,6 +37,95 @@ void CaldavClient::fetchEvents(const QString &url, const QString &user, const QS
     propfind(QUrl(url), true);
 }
 
+void CaldavClient::fetchCalendars(const QString &url, const QString &user, const QString &pass)
+{
+    m_user = user;
+    m_pass = pass;
+
+    // Discover calendars from the account's calendar home (strip any /events suffix).
+    QString base = url;
+    if (base.endsWith(QStringLiteral("/events")))
+        base.chop(QStringLiteral("/events").size());
+    while (base.endsWith(QLatin1Char('/')))
+        base.chop(1);
+
+    propfindCalendars(QUrl(base));
+}
+
+void CaldavClient::propfindCalendars(const QUrl &url)
+{
+    QNetworkRequest req(url);
+    req.setRawHeader("Authorization", authHeader(m_user, m_pass));
+    req.setRawHeader("Depth", "1");
+    req.setRawHeader("Content-Type", "application/xml; charset=utf-8");
+
+    const QByteArray body =
+        "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+        "<d:propfind xmlns:d=\"DAV:\" xmlns:c=\"urn:ietf:params:xml:ns:caldav\">"
+        "<d:prop><d:resourcetype/><d:displayname/></d:prop>"
+        "</d:propfind>";
+
+    QNetworkReply *reply = m_nam->sendCustomRequest(req, "PROPFIND", body);
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
+        handleCalendarsReply(reply);
+    });
+}
+
+void CaldavClient::handleCalendarsReply(QNetworkReply *reply)
+{
+    if (reply->error() != QNetworkReply::NoError) {
+        const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if (status == 401) {
+            emit authenticationFailed();
+            return;
+        }
+        emit failed(QStringLiteral("CalDAV calendar list failed: %1").arg(reply->errorString()));
+        return;
+    }
+
+    const QByteArray xml = reply->readAll();
+    const QUrl base = reply->url();
+
+    QXmlStreamReader reader(xml);
+    QVariantList calendars;
+    QString currentHref;
+    QString currentName;
+    bool inResponse = false;
+    bool isCalendar = false;
+
+    while (!reader.atEnd()) {
+        reader.readNext();
+        if (reader.isStartElement()) {
+            const QString name = reader.name().toString();
+            if (name == QLatin1String("response")) {
+                inResponse = true;
+                currentHref.clear();
+                currentName.clear();
+                isCalendar = false;
+            } else if (name == QLatin1String("href") && inResponse) {
+                currentHref = reader.readElementText();
+            } else if (name == QLatin1String("displayname") && inResponse) {
+                currentName = reader.readElementText();
+            } else if (name == QLatin1String("calendar") && inResponse) {
+                isCalendar = true;
+            }
+        } else if (reader.isEndElement()) {
+            if (reader.name().toString() == QLatin1String("response") && inResponse) {
+                inResponse = false;
+                if (isCalendar) {
+                    QVariantMap c;
+                    c[QStringLiteral("name")] = currentName;
+                    c[QStringLiteral("href")] = base.resolved(currentHref).toString();
+                    calendars.append(c);
+                }
+            }
+        }
+    }
+
+    emit calendarsFetched(calendars);
+}
+
 void CaldavClient::propfind(const QUrl &url, bool calendarData)
 {
     if (m_visited.contains(url))

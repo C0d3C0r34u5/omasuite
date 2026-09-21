@@ -8,6 +8,7 @@
 #include "account/accountmanager.h"
 #include "mail/mailmodel.h"
 #include "calendar/calendarmodel.h"
+#include "calendar/calendarlistmodel.h"
 #include "contacts/contactmodel.h"
 #include "tasks/taskmodel.h"
 #include "net/synccontroller.h"
@@ -43,6 +44,7 @@ class AppCore : public QObject
     Q_PROPERTY(QSortFilterProxyModel *mailInbox READ mailInbox CONSTANT)
     Q_PROPERTY(QSortFilterProxyModel *mailTrash READ mailTrash CONSTANT)
     Q_PROPERTY(CalendarModel *calendar READ calendarModel CONSTANT)
+    Q_PROPERTY(CalendarListModel *calendars READ calendarListModel CONSTANT)
     Q_PROPERTY(ContactModel *contacts READ contactModel CONSTANT)
     Q_PROPERTY(TaskModel *tasks READ taskModel CONSTANT)
     Q_PROPERTY(SyncController *sync READ syncController CONSTANT)
@@ -58,6 +60,7 @@ public:
     QSortFilterProxyModel *mailInbox() const { return m_mailInbox; }
     QSortFilterProxyModel *mailTrash() const { return m_mailTrash; }
     CalendarModel *calendarModel() const { return m_calendar; }
+    CalendarListModel *calendarListModel() const { return m_calendars; }
     ContactModel *contactModel() const { return m_contacts; }
     TaskModel *taskModel() const { return m_tasks; }
     SyncController *syncController() const { return m_sync; }
@@ -75,6 +78,7 @@ private:
     MailFilterModel *m_mailInbox = nullptr;
     MailFilterModel *m_mailTrash = nullptr;
     CalendarModel *m_calendar = nullptr;
+    CalendarListModel *m_calendars = nullptr;
     ContactModel *m_contacts = nullptr;
     TaskModel *m_tasks = nullptr;
     SyncController *m_sync = nullptr;

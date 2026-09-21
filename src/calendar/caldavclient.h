@@ -15,6 +15,7 @@ public:
     explicit CaldavClient(QObject *parent = nullptr);
 
     void fetchEvents(const QString &url, const QString &user, const QString &pass);
+    void fetchCalendars(const QString &url, const QString &user, const QString &pass);
     void createEvent(const QString &url, const QString &user, const QString &pass, const QVariantMap &event);
     void deleteEvent(const QString &url, const QString &user, const QString &pass, const QString &uid);
     void createTodo(const QString &url, const QString &user, const QString &pass, const QVariantMap &task);
@@ -24,6 +25,7 @@ public:
 
 signals:
     void eventsFetched(const QVariantList &events);
+    void calendarsFetched(const QVariantList &calendars);
     void todosFetched(const QVariantList &todos);
     void eventCreated(const QString &uid);
     void eventDeleted(const QString &uid);
@@ -34,6 +36,8 @@ signals:
 
 private:
     void propfind(const QUrl &url, bool calendarData);
+    void propfindCalendars(const QUrl &url);
+    void handleCalendarsReply(QNetworkReply *reply);
     void putEvent(const QUrl &url, const QByteArray &ics);
     void handlePropfindReply(QNetworkReply *reply);
     QByteArray authHeader(const QString &user, const QString &pass) const;

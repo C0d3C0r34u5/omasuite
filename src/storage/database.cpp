@@ -78,6 +78,17 @@ bool Database::createSchema()
             ")"),
 
         QStringLiteral(
+            "CREATE TABLE IF NOT EXISTS calendars ("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "account_id INTEGER NOT NULL DEFAULT 0,"
+            "name TEXT NOT NULL,"
+            "color TEXT DEFAULT '',"
+            "type TEXT NOT NULL DEFAULT 'caldav',"
+            "source_url TEXT DEFAULT '',"
+            "visible INTEGER DEFAULT 1"
+            ")"),
+
+        QStringLiteral(
             "CREATE TABLE IF NOT EXISTS emails ("
             "id INTEGER PRIMARY KEY AUTOINCREMENT,"
             "account_id INTEGER NOT NULL,"
@@ -99,6 +110,7 @@ bool Database::createSchema()
             "CREATE TABLE IF NOT EXISTS events ("
             "id INTEGER PRIMARY KEY AUTOINCREMENT,"
             "account_id INTEGER NOT NULL,"
+            "calendar_id INTEGER NOT NULL DEFAULT 0,"
             "uid TEXT,"
             "title TEXT DEFAULT '',"
             "description TEXT DEFAULT '',"
@@ -194,6 +206,13 @@ bool Database::createSchema()
     if (q.lastError().isValid()) {
         QSqlQuery alt(m_db);
         alt.exec(QStringLiteral("ALTER TABLE emails ADD COLUMN is_trashed INTEGER DEFAULT 0"));
+    }
+
+    // Migration: add calendar_id column to events if missing.
+    q.exec(QStringLiteral("SELECT calendar_id FROM events LIMIT 1"));
+    if (q.lastError().isValid()) {
+        QSqlQuery alt(m_db);
+        alt.exec(QStringLiteral("ALTER TABLE events ADD COLUMN calendar_id INTEGER NOT NULL DEFAULT 0"));
     }
 
     return true;

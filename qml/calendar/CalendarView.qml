@@ -19,6 +19,19 @@ Rectangle {
         return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
     }
 
+    function isEventVisible(calendarId) {
+        if (calendarId === 0)
+            return true
+        return AppCore.calendars.visibleCalendarIds.indexOf(calendarId) >= 0
+    }
+
+    function visibleEvents(events) {
+        var out = []
+        for (var i = 0; i < events.length; i++)
+            if (isEventVisible(events[i].calendarId)) out.push(events[i])
+        return out
+    }
+
     function rebuildGrid() {
         var y = viewDate.getFullYear()
         var m = viewDate.getMonth()
@@ -80,6 +93,12 @@ Rectangle {
                     text: "Sync"
                     flat: true
                     onClicked: Sync.syncCalendar(calView.currentAccountId())
+                }
+
+                Button {
+                    text: "Calendars"
+                    flat: true
+                    onClicked: calendarsPopup.open()
                 }
 
                 Button {
@@ -154,7 +173,7 @@ Rectangle {
                             property bool isSelected: dayDate.getFullYear() === calView.selectedDay.getFullYear()
                                                      && dayDate.getMonth() === calView.selectedDay.getMonth()
                                                      && dayDate.getDate() === calView.selectedDay.getDate()
-                            property var events: calView.gridDays[index] ? AppCore.calendar.eventsForDate(calView.startOfDay(dayDate)) : []
+                            property var events: calView.gridDays[index] ? calView.visibleEvents(AppCore.calendar.eventsForDate(calView.startOfDay(dayDate))) : []
 
                             width: dayGrid.width / 7
                             height: dayGrid.height / 6
@@ -246,7 +265,7 @@ Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         clip: true
-                        model: AppCore.calendar.eventsForDate(calView.startOfDay(calView.selectedDay))
+                        model: calView.visibleEvents(AppCore.calendar.eventsForDate(calView.startOfDay(calView.selectedDay)))
 
                         Text {
                             anchors.centerIn: parent
@@ -286,7 +305,7 @@ Rectangle {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    Sync.deleteEvent(calView.currentAccountId(), modelData.id, modelData.uid)
+                                    Sync.deleteEvent(calView.currentAccountId(), modelData.calendarId, modelData.id, modelData.uid)
                                 }
                             }
                         }
@@ -335,6 +354,17 @@ Rectangle {
                 placeholderText: "Event title"
             }
 
+            ColumnLayout { Layout.fillWidth: true; spacing: 4
+                Text { text: "Calendar"; font.pixelSize: 12; color: Theme.textSecondary }
+                ComboBox {
+                    id: calendarCombo
+                    Layout.fillWidth: true
+                    model: AppCore.calendars
+                    textRole: "name"
+                    valueRole: "id"
+                }
+            }
+
             TextArea {
                 id: descField
                 Layout.fillWidth: true
@@ -374,7 +404,9 @@ Rectangle {
                         var dayStart = calView.startOfDay(calView.selectedDay)
                         var startMs = dayStart + (startHour.value * 60 + startMin.value) * 60000
                         var endMs = dayStart + (endHour.value * 60 + endMin.value) * 60000
-                        Sync.createEvent(calView.currentAccountId(), titleField.text, descField.text, "",
+                        var calId = calendarCombo.currentValue !== undefined ? calendarCombo.currentValue : 0
+                        var acctId = AppCore.calendars.accountIdOf(calId)
+                        Sync.createEvent(acctId, calId, titleField.text, descField.text, "",
                                          startMs, endMs, allDaySwitch.checked)
                         eventDialog.close()
                     }
@@ -391,6 +423,92 @@ Rectangle {
                         verticalAlignment: Text.AlignVCenter
                     }
                 }
+            }
+        }
+    }
+
+    // ---- Calendars popup ----
+    Popup {
+        id: calendarsPopup
+        width: 340
+        modal: true
+        anchors.centerIn: parent
+        padding: 0
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+        background: Rectangle { radius: 12; color: Theme.surface }
+
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 16
+            spacing: 8
+
+            Text {
+                text: "Calendars"
+                font.pixelSize: 16
+                font.weight: Font.DemiBold
+                color: Theme.textPrimary
+            }
+
+            ListView {
+                id: calList
+                Layout.fillWidth: true
+                Layout.preferredHeight: Math.min(calList.count * 38, 300)
+                clip: true
+                model: AppCore.calendars
+
+                delegate: RowLayout {
+                    width: calList.width
+                    height: 34
+                    spacing: 8
+
+                    Rectangle {
+                        width: 12
+                        height: 12
+                        radius: 6
+                        color: model.color !== "" ? model.color : Theme.accent
+                    }
+
+                    Text {
+                        text: model.name
+                        color: Theme.textPrimary
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                    }
+
+                    CheckBox {
+                        checked: model.visible
+                        onClicked: AppCore.calendars.setVisible(model.id, checked)
+                    }
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+
+                TextField {
+                    id: newCalName
+                    Layout.fillWidth: true
+                    placeholderText: "New local calendar name"
+                }
+
+                Button {
+                    text: "Add"
+                    enabled: newCalName.text.length > 0
+                    onClicked: {
+                        var colors = ["#4CAF50", "#2196F3", "#FF9800", "#9C27B0", "#E91E63", "#00BCD4"]
+                        AppCore.calendars.addLocalCalendar(newCalName.text, colors[AppCore.calendars.count % colors.length])
+                        newCalName.text = ""
+                    }
+                }
+            }
+
+            Button {
+                text: "Close"
+                flat: true
+                Layout.alignment: Qt.AlignRight
+                onClicked: calendarsPopup.close()
             }
         }
     }

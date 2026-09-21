@@ -6,6 +6,7 @@
 #include "mail/imapclient.h"
 #include "mail/smtpclient.h"
 #include "calendar/calendarmodel.h"
+#include "calendar/calendarlistmodel.h"
 #include "calendar/caldavclient.h"
 #include "contacts/contactmodel.h"
 #include "contacts/carddavclient.h"
@@ -19,12 +20,13 @@
 #include <QDebug>
 
 SyncController::SyncController(AccountManager *accounts, MailModel *mail, CalendarModel *calendar,
-                               ContactModel *contacts, TaskModel *tasks, OAuth2Manager *oauth,
-                               QObject *parent)
+                               CalendarListModel *calendars, ContactModel *contacts, TaskModel *tasks,
+                               OAuth2Manager *oauth, QObject *parent)
     : QObject(parent)
     , m_accounts(accounts)
     , m_mail(mail)
     , m_calendar(calendar)
+    , m_calendars(calendars)
     , m_contacts(contacts)
     , m_tasks(tasks)
     , m_oauth(oauth)
@@ -319,7 +321,7 @@ void SyncController::syncCalendar(int accountId)
             int added = 0;
             for (const QVariant &v : events) {
                 const QVariantMap m = v.toMap();
-                const int id = m_calendar->addSynced(accountId, m.value(QStringLiteral("uid")).toString(),
+                const int id = m_calendar->addSynced(accountId, 0, m.value(QStringLiteral("uid")).toString(),
                                                      m.value(QStringLiteral("subject")).toString(),
                                                      QString(),
                                                      m.value(QStringLiteral("location")).toString(),
@@ -345,22 +347,40 @@ void SyncController::syncCalendar(int accountId)
     if (a->caldavUrl().isEmpty())
         return;
 
-    setSyncing(true, QStringLiteral("Syncing calendar..."));
+    setSyncing(true, QStringLiteral("Syncing calendars..."));
     if (a->authMethod() == QStringLiteral("oauth2"))
         m_caldav->setBearerToken(m_oauth->accessToken(a->email()));
     else
         m_caldav->setBearerToken(QString());
+
+    m_syncCalendarAccountId = accountId;
+    m_calendarFetchQueue.clear();
+    m_currentFetchCalendarId = 0;
+    m_syncCalendarAdded = 0;
 
     m_caldav->disconnect(this);
     connect(m_caldav, &CaldavClient::authenticationFailed, this, [this, accountId]() {
         if (Account *acc = account(accountId))
             requestTokenRefresh(acc, [this, accountId]() { syncCalendar(accountId); });
     });
-    connect(m_caldav, &CaldavClient::eventsFetched, this, [this, accountId](const QVariantList &events) {
-        int added = 0;
+    connect(m_caldav, &CaldavClient::calendarsFetched, this, [this](const QVariantList &cals) {
+        m_calendarFetchQueue.clear();
+        for (const QVariant &v : cals) {
+            const QVariantMap m = v.toMap();
+            const QString name = m.value(QStringLiteral("name")).toString();
+            const QString href = m.value(QStringLiteral("href")).toString();
+            const int calId = m_calendars->upsertCalendar(m_syncCalendarAccountId, name, QString(),
+                                                          QStringLiteral("caldav"), href);
+            if (calId > 0)
+                m_calendarFetchQueue.append(qMakePair(calId, href));
+        }
+        fetchNextCalendarEvents();
+    });
+    connect(m_caldav, &CaldavClient::eventsFetched, this, [this](const QVariantList &events) {
         for (const QVariant &v : events) {
             const QVariantMap m = v.toMap();
-            const int id = m_calendar->addSynced(accountId, m.value(QStringLiteral("uid")).toString(),
+            const int id = m_calendar->addSynced(m_syncCalendarAccountId, m_currentFetchCalendarId,
+                                                 m.value(QStringLiteral("uid")).toString(),
                                                  m.value(QStringLiteral("title")).toString(),
                                                  m.value(QStringLiteral("description")).toString(),
                                                  m.value(QStringLiteral("location")).toString(),
@@ -368,15 +388,38 @@ void SyncController::syncCalendar(int accountId)
                                                  m.value(QStringLiteral("end")).toLongLong(),
                                                  m.value(QStringLiteral("allDay")).toBool());
             if (id > 0)
-                ++added;
+                ++m_syncCalendarAdded;
         }
-        setSyncing(false, QStringLiteral("Calendar synced (%1 new)").arg(added));
+        fetchNextCalendarEvents();
     });
     connect(m_caldav, &CaldavClient::failed, this, [this](const QString &r) {
         setSyncing(false, r);
     });
 
-    m_caldav->fetchEvents(a->caldavUrl(), a->email(), a->password());
+    m_caldav->fetchCalendars(a->caldavUrl(), a->email(), a->password());
+}
+
+void SyncController::syncCalendars(int accountId)
+{
+    syncCalendar(accountId);
+}
+
+void SyncController::fetchNextCalendarEvents()
+{
+    if (m_calendarFetchQueue.isEmpty()) {
+        setSyncing(false, QStringLiteral("Calendar synced (%1 new)").arg(m_syncCalendarAdded));
+        return;
+    }
+
+    const auto next = m_calendarFetchQueue.takeFirst();
+    m_currentFetchCalendarId = next.first;
+    const QString href = next.second;
+
+    Account *a = account(m_syncCalendarAccountId);
+    if (!a)
+        return;
+    setSyncing(true, QStringLiteral("Syncing calendar..."));
+    m_caldav->fetchEvents(href, a->email(), a->password());
 }
 
 void SyncController::syncContacts(int accountId)
@@ -550,33 +593,39 @@ void SyncController::syncAll()
     syncTasks(id);
 }
 
-int SyncController::createEvent(int accountId, const QString &title, const QString &description,
+int SyncController::createEvent(int accountId, int calendarId, const QString &title, const QString &description,
                                 const QString &location, qint64 start, qint64 end, bool allDay)
 {
     const QString uid = QUuid::createUuid().toString(QUuid::WithoutBraces);
-    const int localId = m_calendar->addSynced(accountId, uid, title, description, location, start, end, allDay);
+    const int localId = m_calendar->addSynced(accountId, calendarId, uid, title, description, location, start, end, allDay);
 
     Account *a = account(accountId);
-    if (a && !a->caldavUrl().isEmpty()) {
-        QVariantMap ev;
-        ev[QStringLiteral("uid")] = uid;
-        ev[QStringLiteral("title")] = title;
-        ev[QStringLiteral("description")] = description;
-        ev[QStringLiteral("location")] = location;
-        ev[QStringLiteral("start")] = start;
-        ev[QStringLiteral("end")] = end;
-        ev[QStringLiteral("allDay")] = allDay;
-        m_caldav->createEvent(a->caldavUrl(), a->email(), a->password(), ev);
+    if (a && m_calendars->typeOf(calendarId) != QStringLiteral("local") && !a->caldavUrl().isEmpty()) {
+        const QString url = m_calendars->sourceUrl(calendarId);
+        if (!url.isEmpty()) {
+            QVariantMap ev;
+            ev[QStringLiteral("uid")] = uid;
+            ev[QStringLiteral("title")] = title;
+            ev[QStringLiteral("description")] = description;
+            ev[QStringLiteral("location")] = location;
+            ev[QStringLiteral("start")] = start;
+            ev[QStringLiteral("end")] = end;
+            ev[QStringLiteral("allDay")] = allDay;
+            m_caldav->createEvent(url, a->email(), a->password(), ev);
+        }
     }
     return localId;
 }
 
-void SyncController::deleteEvent(int accountId, int localId, const QString &uid)
+void SyncController::deleteEvent(int accountId, int calendarId, int localId, const QString &uid)
 {
     m_calendar->removeEvent(localId);
     Account *a = account(accountId);
-    if (a && !uid.isEmpty() && !a->caldavUrl().isEmpty())
-        m_caldav->deleteEvent(a->caldavUrl(), a->email(), a->password(), uid);
+    if (a && !uid.isEmpty() && m_calendars->typeOf(calendarId) != QStringLiteral("local") && !a->caldavUrl().isEmpty()) {
+        const QString url = m_calendars->sourceUrl(calendarId);
+        if (!url.isEmpty())
+            m_caldav->deleteEvent(url, a->email(), a->password(), uid);
+    }
 }
 
 int SyncController::createContact(int accountId, const QString &firstName, const QString &lastName,
