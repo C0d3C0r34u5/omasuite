@@ -24,9 +24,10 @@ Rectangle {
         var m = viewDate.getMonth()
         var first = new Date(y, m, 1)
         var offset = first.getDay()
-        gridDays = []
+        var arr = []
         for (var i = 0; i < 42; i++)
-            gridDays.push(new Date(y, m, 1 - offset + i))
+            arr.push(new Date(y, m, 1 - offset + i))
+        gridDays = arr
     }
 
     function monthLabel() {
