@@ -319,6 +319,7 @@ Rectangle {
     Popup {
         id: eventDialog
         width: 440
+        height: 540
         modal: true
         anchors.centerIn: parent
         padding: 0
