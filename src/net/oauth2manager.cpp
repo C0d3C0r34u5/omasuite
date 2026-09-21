@@ -10,6 +10,7 @@
 #include <QUrlQuery>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QDateTime>
 #include <QDebug>
 
 namespace {
@@ -47,13 +48,31 @@ QString OAuth2Manager::refreshToken(const QString &email) const
     return readTokens(email).value(QStringLiteral("refresh_token")).toString();
 }
 
-void OAuth2Manager::storeTokens(const QString &email, const QString &access, const QString &refresh)
+bool OAuth2Manager::accessTokenValid(const QString &email) const
+{
+    const QJsonObject obj = readTokens(email);
+    const QString access = obj.value(QStringLiteral("access_token")).toString();
+    if (access.isEmpty())
+        return false;
+
+    const qint64 expiry = static_cast<qint64>(obj.value(QStringLiteral("expires_at")).toDouble());
+    if (expiry <= 0)
+        return true; // no expiry recorded (legacy token) -> assume still valid
+
+    // Treat as invalid 60 seconds before the actual expiry to leave headroom.
+    return expiry > QDateTime::currentMSecsSinceEpoch() + 60000;
+}
+
+void OAuth2Manager::storeTokens(const QString &email, const QString &access, const QString &refresh,
+                                qint64 expiresAtMs)
 {
     QJsonObject obj = readTokens(email);
     if (!access.isEmpty())
         obj[QStringLiteral("access_token")] = access;
     if (!refresh.isEmpty())
         obj[QStringLiteral("refresh_token")] = refresh;
+    if (expiresAtMs > 0)
+        obj[QStringLiteral("expires_at")] = static_cast<double>(expiresAtMs);
 
     const QString json = QString::fromUtf8(QJsonDocument(obj).toJson(QJsonDocument::Compact));
     SecretStore::instance()->store(tokenKey(email), json);
@@ -129,11 +148,18 @@ void OAuth2Manager::startFlow(const QString &provider, const QString &email,
     connect(m_flow, &QOAuth2AuthorizationCodeFlow::granted, this, [this]() {
         const QString access = m_flow->token();
         const QString refresh = m_flow->refreshToken();
-        storeTokens(m_activeEmail, access, refresh);
+        const qint64 expiry = m_flow->expirationAt().toMSecsSinceEpoch();
+        storeTokens(m_activeEmail, access, refresh, expiry);
         if (m_refreshing)
             emit tokenRefreshed(m_activeEmail);
         else
             emit authorized(m_activeEmail);
+    });
+
+    connect(m_flow, &QOAuth2AuthorizationCodeFlow::serverReportedErrorOccurred, this,
+            [this](const QString &error, const QString &desc, const QUrl &uri) {
+        Q_UNUSED(uri);
+        emit failed(m_activeEmail, desc.isEmpty() ? error : desc);
     });
 
     connect(m_flow, &QOAuth2AuthorizationCodeFlow::statusChanged, this,

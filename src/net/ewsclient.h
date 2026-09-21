@@ -32,6 +32,7 @@ signals:
     void tasksFetched(const QVariantList &tasks);
     void sent();
     void failed(const QString &reason);
+    void authenticationFailed();
 
 private:
     void post(const QByteArray &soap, std::function<void(QXmlStreamReader &)> parser);

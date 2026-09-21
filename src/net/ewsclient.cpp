@@ -66,6 +66,10 @@ void EwsClient::post(const QByteArray &soap, std::function<void(QXmlStreamReader
     connect(reply, &QNetworkReply::finished, this, [this, reply, parser]() {
         reply->deleteLater();
         if (reply->error() != QNetworkReply::NoError) {
+            if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401) {
+                emit authenticationFailed();
+                return;
+            }
             emit failed(QStringLiteral("EWS request failed: %1").arg(reply->errorString()));
             return;
         }

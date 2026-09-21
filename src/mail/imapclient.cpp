@@ -88,7 +88,7 @@ void ImapClient::loginXoauth2(const QString &user, const QString &accessToken)
             emit authenticated();
         } else {
             m_error = QStringLiteral("XOAUTH2 failed: %1").arg(text);
-            emit failed(m_error);
+            emit authenticationFailed();
         }
     });
 }

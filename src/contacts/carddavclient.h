@@ -23,6 +23,7 @@ signals:
     void contactCreated(const QString &uid);
     void contactDeleted(const QString &uid);
     void failed(const QString &reason);
+    void authenticationFailed();
 
 private:
     QByteArray authHeader(const QString &user, const QString &pass) const;

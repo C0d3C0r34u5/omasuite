@@ -126,6 +126,9 @@ void SmtpClient::onReadyRead()
             if (code >= 200 && code < 300) {
                 m_step = MailFrom;
                 advance();
+            } else if (m_useOAuth2) {
+                emit authenticationFailed();
+                m_step = Done;
             } else {
                 emit failed(QStringLiteral("SMTP authentication failed"));
                 m_step = Done;

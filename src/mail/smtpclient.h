@@ -21,6 +21,7 @@ public:
 signals:
     void sent();
     void failed(const QString &reason);
+    void authenticationFailed();
 
 private slots:
     void onReadyRead();

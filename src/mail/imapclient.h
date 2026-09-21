@@ -30,6 +30,7 @@ signals:
     void connected();
     void authenticated();
     void failed(const QString &reason);
+    void authenticationFailed();
     void foldersFetched(const QVariantList &folders);
     void messagesFetched(const QVariantList &messages);
     void bodyFetched(int uid, const QString &body);

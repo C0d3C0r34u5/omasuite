@@ -62,6 +62,7 @@ private:
     void setSyncing(bool syncing, const QString &status);
     Account *account(int id) const;
     bool ensureToken(Account *a, std::function<void()> retry);
+    void requestTokenRefresh(Account *a, std::function<void()> retry);
     bool isExchange(Account *a) const;
     void setupEws(Account *a);
 

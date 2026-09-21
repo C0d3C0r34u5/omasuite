@@ -45,6 +45,10 @@ void CarddavClient::fetchContacts(const QString &url, const QString &user, const
     connect(reply, &QNetworkReply::finished, this, [this, reply]() {
         reply->deleteLater();
         if (reply->error() != QNetworkReply::NoError) {
+            if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401) {
+                emit authenticationFailed();
+                return;
+            }
             emit failed(QStringLiteral("CardDAV request failed: %1").arg(reply->errorString()));
             return;
         }
@@ -90,6 +94,10 @@ void CarddavClient::createContact(const QString &url, const QString &user, const
     connect(reply, &QNetworkReply::finished, this, [this, reply, uid]() {
         reply->deleteLater();
         if (reply->error() != QNetworkReply::NoError) {
+            if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401) {
+                emit authenticationFailed();
+                return;
+            }
             emit failed(QStringLiteral("CardDAV create failed: %1").arg(reply->errorString()));
             return;
         }
@@ -115,6 +123,10 @@ void CarddavClient::deleteContact(const QString &url, const QString &user, const
     connect(reply, &QNetworkReply::finished, this, [this, reply, uid]() {
         reply->deleteLater();
         if (reply->error() != QNetworkReply::NoError) {
+            if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401) {
+                emit authenticationFailed();
+                return;
+            }
             emit failed(QStringLiteral("CardDAV delete failed: %1").arg(reply->errorString()));
             return;
         }

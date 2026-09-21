@@ -60,8 +60,7 @@ bool SyncController::ensureToken(Account *a, std::function<void()> retry)
     if (a->authMethod() != QStringLiteral("oauth2"))
         return true;
 
-    const QString token = m_oauth->accessToken(a->email());
-    if (!token.isEmpty())
+    if (m_oauth->accessTokenValid(a->email()))
         return true;
 
     m_retryAfterAuth = retry;
@@ -73,6 +72,13 @@ bool SyncController::ensureToken(Account *a, std::function<void()> retry)
         m_oauth->authorize(a->provider(), a->email(), a->oauthClientId(), a->oauthClientSecret());
     }
     return false;
+}
+
+void SyncController::requestTokenRefresh(Account *a, std::function<void()> retry)
+{
+    m_retryAfterAuth = retry;
+    setSyncing(true, QStringLiteral("Session expired - refreshing sign-in..."));
+    m_oauth->refresh(a->provider(), a->email(), a->oauthClientId(), a->oauthClientSecret());
 }
 
 void SyncController::setSyncing(bool syncing, const QString &status)
@@ -119,6 +125,10 @@ void SyncController::syncMail(int accountId)
         setupEws(a);
         setSyncing(true, QStringLiteral("Syncing mail..."));
         m_ews->disconnect(this);
+        connect(m_ews, &EwsClient::authenticationFailed, this, [this, accountId]() {
+            if (Account *acc = account(accountId))
+                requestTokenRefresh(acc, [this, accountId]() { syncMail(accountId); });
+        });
         connect(m_ews, &EwsClient::messagesFetched, this, [this, accountId](const QVariantList &msgs) {
             int added = 0;
             for (const QVariant &v : msgs) {
@@ -154,6 +164,10 @@ void SyncController::syncMail(int accountId)
     setSyncing(true, QStringLiteral("Connecting to %1...").arg(a->imapHost()));
 
     m_imap->disconnect(this);
+    connect(m_imap, &ImapClient::authenticationFailed, this, [this, accountId]() {
+        if (Account *acc = account(accountId))
+            requestTokenRefresh(acc, [this, accountId]() { syncMail(accountId); });
+    });
     connect(m_imap, &ImapClient::connected, this, [this, oauth, token]() {
         setSyncing(true, QStringLiteral("Signing in..."));
         if (oauth)
@@ -235,6 +249,13 @@ void SyncController::sendMail(int accountId, const QString &to, const QString &s
         setupEws(a);
         setSyncing(true, QStringLiteral("Sending message..."));
         m_ews->disconnect(this);
+        connect(m_ews, &EwsClient::authenticationFailed, this,
+                [this, accountId, to, subject, body]() {
+            if (Account *acc = account(accountId))
+                requestTokenRefresh(acc, [this, accountId, to, subject, body]() {
+                    sendMail(accountId, to, subject, body);
+                });
+        });
         connect(m_ews, &EwsClient::sent, this, [this, accountId, to, subject, body]() {
             m_mail->add(accountId, subject, QStringLiteral("Me"), to, body);
             setSyncing(false, QStringLiteral("Message sent"));
@@ -251,6 +272,14 @@ void SyncController::sendMail(int accountId, const QString &to, const QString &s
 
     setSyncing(true, QStringLiteral("Sending message..."));
 
+    m_smtp->disconnect(this);
+    connect(m_smtp, &SmtpClient::authenticationFailed, this,
+            [this, accountId, to, subject, body, cc]() {
+        if (Account *acc = account(accountId))
+            requestTokenRefresh(acc, [this, accountId, to, subject, body, cc]() {
+                sendMail(accountId, to, subject, body, cc);
+            });
+    });
     connect(m_smtp, &SmtpClient::sent, this, [this, accountId, to, subject, body]() {
         m_mail->add(accountId, subject, QStringLiteral("Me"), to, body);
         setSyncing(false, QStringLiteral("Message sent"));
@@ -282,6 +311,10 @@ void SyncController::syncCalendar(int accountId)
         setupEws(a);
         setSyncing(true, QStringLiteral("Syncing calendar..."));
         m_ews->disconnect(this);
+        connect(m_ews, &EwsClient::authenticationFailed, this, [this, accountId]() {
+            if (Account *acc = account(accountId))
+                requestTokenRefresh(acc, [this, accountId]() { syncCalendar(accountId); });
+        });
         connect(m_ews, &EwsClient::eventsFetched, this, [this, accountId](const QVariantList &events) {
             int added = 0;
             for (const QVariant &v : events) {
@@ -319,6 +352,10 @@ void SyncController::syncCalendar(int accountId)
         m_caldav->setBearerToken(QString());
 
     m_caldav->disconnect(this);
+    connect(m_caldav, &CaldavClient::authenticationFailed, this, [this, accountId]() {
+        if (Account *acc = account(accountId))
+            requestTokenRefresh(acc, [this, accountId]() { syncCalendar(accountId); });
+    });
     connect(m_caldav, &CaldavClient::eventsFetched, this, [this, accountId](const QVariantList &events) {
         int added = 0;
         for (const QVariant &v : events) {
@@ -354,6 +391,10 @@ void SyncController::syncContacts(int accountId)
         setupEws(a);
         setSyncing(true, QStringLiteral("Syncing contacts..."));
         m_ews->disconnect(this);
+        connect(m_ews, &EwsClient::authenticationFailed, this, [this, accountId]() {
+            if (Account *acc = account(accountId))
+                requestTokenRefresh(acc, [this, accountId]() { syncContacts(accountId); });
+        });
         connect(m_ews, &EwsClient::contactsFetched, this, [this, accountId](const QVariantList &contacts) {
             int added = 0;
             for (const QVariant &v : contacts) {
@@ -395,6 +436,10 @@ void SyncController::syncContacts(int accountId)
         m_carddav->setBearerToken(QString());
 
     m_carddav->disconnect(this);
+    connect(m_carddav, &CarddavClient::authenticationFailed, this, [this, accountId]() {
+        if (Account *acc = account(accountId))
+            requestTokenRefresh(acc, [this, accountId]() { syncContacts(accountId); });
+    });
     connect(m_carddav, &CarddavClient::contactsFetched, this, [this, accountId](const QVariantList &contacts) {
         int added = 0;
         for (const QVariant &v : contacts) {
@@ -429,6 +474,10 @@ void SyncController::syncTasks(int accountId)
         setupEws(a);
         setSyncing(true, QStringLiteral("Syncing tasks..."));
         m_ews->disconnect(this);
+        connect(m_ews, &EwsClient::authenticationFailed, this, [this, accountId]() {
+            if (Account *acc = account(accountId))
+                requestTokenRefresh(acc, [this, accountId]() { syncTasks(accountId); });
+        });
         connect(m_ews, &EwsClient::tasksFetched, this, [this, accountId](const QVariantList &tasks) {
             int added = 0;
             for (const QVariant &v : tasks) {
@@ -464,6 +513,10 @@ void SyncController::syncTasks(int accountId)
         m_caldav->setBearerToken(QString());
 
     m_caldav->disconnect(this);
+    connect(m_caldav, &CaldavClient::authenticationFailed, this, [this, accountId]() {
+        if (Account *acc = account(accountId))
+            requestTokenRefresh(acc, [this, accountId]() { syncTasks(accountId); });
+    });
     connect(m_caldav, &CaldavClient::todosFetched, this, [this, accountId](const QVariantList &todos) {
         int added = 0;
         for (const QVariant &v : todos) {

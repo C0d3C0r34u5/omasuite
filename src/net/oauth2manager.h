@@ -16,7 +16,9 @@ public:
     Q_INVOKABLE bool hasTokens(const QString &email) const;
     Q_INVOKABLE QString accessToken(const QString &email) const;
     Q_INVOKABLE QString refreshToken(const QString &email) const;
-    void storeTokens(const QString &email, const QString &access, const QString &refresh);
+    Q_INVOKABLE bool accessTokenValid(const QString &email) const;
+    void storeTokens(const QString &email, const QString &access, const QString &refresh,
+                     qint64 expiresAtMs = 0);
 
     Q_INVOKABLE void authorize(const QString &provider, const QString &email, const QString &clientId,
                    const QString &clientSecret = QString());

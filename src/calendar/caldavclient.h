@@ -30,6 +30,7 @@ signals:
     void todoCreated(const QString &uid);
     void todoDeleted(const QString &uid);
     void failed(const QString &reason);
+    void authenticationFailed();
 
 private:
     void propfind(const QUrl &url, bool calendarData);

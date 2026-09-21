@@ -70,6 +70,11 @@ void CaldavClient::propfind(const QUrl &url, bool calendarData)
 void CaldavClient::handlePropfindReply(QNetworkReply *reply)
 {
     if (reply->error() != QNetworkReply::NoError) {
+        const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if (status == 401) {
+            emit authenticationFailed();
+            return;
+        }
         emit failed(QStringLiteral("CalDAV request failed: %1").arg(reply->errorString()));
         return;
     }
@@ -150,6 +155,10 @@ void CaldavClient::createEvent(const QString &url, const QString &user, const QS
     connect(reply, &QNetworkReply::finished, this, [this, reply, uid]() {
         reply->deleteLater();
         if (reply->error() != QNetworkReply::NoError) {
+            if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401) {
+                emit authenticationFailed();
+                return;
+            }
             emit failed(QStringLiteral("CalDAV create failed: %1").arg(reply->errorString()));
             return;
         }
@@ -175,6 +184,10 @@ void CaldavClient::deleteEvent(const QString &url, const QString &user, const QS
     connect(reply, &QNetworkReply::finished, this, [this, reply, uid]() {
         reply->deleteLater();
         if (reply->error() != QNetworkReply::NoError) {
+            if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401) {
+                emit authenticationFailed();
+                return;
+            }
             emit failed(QStringLiteral("CalDAV delete failed: %1").arg(reply->errorString()));
             return;
         }
@@ -209,6 +222,10 @@ void CaldavClient::createTodo(const QString &url, const QString &user, const QSt
     connect(reply, &QNetworkReply::finished, this, [this, reply, uid]() {
         reply->deleteLater();
         if (reply->error() != QNetworkReply::NoError) {
+            if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401) {
+                emit authenticationFailed();
+                return;
+            }
             emit failed(QStringLiteral("CalDAV todo create failed: %1").arg(reply->errorString()));
             return;
         }
@@ -234,6 +251,10 @@ void CaldavClient::deleteTodo(const QString &url, const QString &user, const QSt
     connect(reply, &QNetworkReply::finished, this, [this, reply, uid]() {
         reply->deleteLater();
         if (reply->error() != QNetworkReply::NoError) {
+            if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 401) {
+                emit authenticationFailed();
+                return;
+            }
             emit failed(QStringLiteral("CalDAV todo delete failed: %1").arg(reply->errorString()));
             return;
         }
