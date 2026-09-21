@@ -91,6 +91,7 @@ bool Database::createSchema()
             "timestamp INTEGER DEFAULT 0,"
             "is_read INTEGER DEFAULT 0,"
             "is_starred INTEGER DEFAULT 0,"
+            "is_trashed INTEGER DEFAULT 0,"
             "FOREIGN KEY(account_id) REFERENCES accounts(id) ON DELETE CASCADE"
             ")"),
 
@@ -186,6 +187,13 @@ bool Database::createSchema()
     if (q.lastError().isValid()) {
         QSqlQuery alt(m_db);
         alt.exec(QStringLiteral("ALTER TABLE accounts ADD COLUMN ews_url TEXT DEFAULT ''"));
+    }
+
+    // Migration: add is_trashed column if missing.
+    q.exec(QStringLiteral("SELECT is_trashed FROM emails LIMIT 1"));
+    if (q.lastError().isValid()) {
+        QSqlQuery alt(m_db);
+        alt.exec(QStringLiteral("ALTER TABLE emails ADD COLUMN is_trashed INTEGER DEFAULT 0"));
     }
 
     return true;

@@ -6,6 +6,7 @@
         <file>qml/components/ProviderButton.qml</file>
         <file>qml/components/SidebarButton.qml</file>
         <file>qml/mail/MailView.qml</file>
+        <file>qml/mail/TrashView.qml</file>
         <file>qml/calendar/CalendarView.qml</file>
         <file>qml/contacts/ContactsView.qml</file>
         <file>qml/tasks/TasksView.qml</file>

@@ -14,9 +14,40 @@ Rectangle {
 
     property int navIndex: 0
 
-    RowLayout {
+    ColumnLayout {
         anchors.fill: parent
         spacing: 0
+
+        MenuBar {
+            Layout.fillWidth: true
+
+            Menu {
+                title: "File"
+                Action { text: "New Message"; onTriggered: mailView.openCompose() }
+                Action { text: "Sync All"; onTriggered: Sync.syncAll() }
+                MenuSeparator {}
+                Action { text: "Quit"; onTriggered: Qt.quit() }
+            }
+
+            Menu {
+                title: "View"
+                Action { text: "Mail"; onTriggered: main.navIndex = 0 }
+                Action { text: "Calendar"; onTriggered: main.navIndex = 1 }
+                Action { text: "Contacts"; onTriggered: main.navIndex = 2 }
+                Action { text: "Tasks"; onTriggered: main.navIndex = 3 }
+                Action { text: "Trash"; onTriggered: main.navIndex = 4 }
+            }
+
+            Menu {
+                title: "Help"
+                Action { text: "About OmaSuite"; onTriggered: aboutDialog.open() }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            spacing: 0
 
         // ---------- Sidebar ----------
         Rectangle {
@@ -85,6 +116,14 @@ Rectangle {
                     symbol: "\u2713"
                     active: main.navIndex === 3
                     onClicked: main.navIndex = 3
+                }
+
+                SidebarButton {
+                    label: "Trash"
+                    symbol: "\u2715"
+                    badge: AppCore.mail.trashCount > 0 ? String(AppCore.mail.trashCount) : ""
+                    active: main.navIndex === 4
+                    onClicked: main.navIndex = 4
                 }
 
                 Item { Layout.fillHeight: true }
@@ -181,10 +220,27 @@ Rectangle {
             Layout.fillHeight: true
             currentIndex: main.navIndex
 
-            MailView {}
+            MailView { id: mailView }
             CalendarView {}
             ContactsView {}
             TasksView {}
+            TrashView {}
+        }
+        }
+    }
+
+    // About dialog
+    Dialog {
+        id: aboutDialog
+        title: "About OmaSuite"
+        modal: true
+        anchors.centerIn: parent
+        standardButtons: Dialog.Ok
+
+        Label {
+            text: "OmaSuite " + AppCore.appVersion + "\n\nAll-in-one mail, calendar, contacts and tasks."
+            wrapMode: Text.WordWrap
+            width: 300
         }
     }
 

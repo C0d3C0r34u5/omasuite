@@ -8,6 +8,7 @@ Rectangle {
 
     property string label: ""
     property string symbol: ""
+    property string badge: ""
     property bool active: false
     property color accent: Theme.accent
     signal clicked()
@@ -37,6 +38,23 @@ Rectangle {
             font.weight: active ? Font.DemiBold : Font.Normal
             color: active ? Theme.textPrimary : Theme.textSecondary
             Layout.fillWidth: true
+        }
+
+        Rectangle {
+            visible: root.badge !== ""
+            Layout.preferredWidth: badgeText.implicitWidth + 12
+            Layout.preferredHeight: 18
+            radius: 9
+            color: Theme.textFaint
+
+            Text {
+                id: badgeText
+                anchors.centerIn: parent
+                text: root.badge
+                color: Theme.surface
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+            }
         }
     }
 

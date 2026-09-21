@@ -38,6 +38,7 @@ QVariant MailModel::data(const QModelIndex &index, int role) const
         return QDateTime::fromMSecsSinceEpoch(it.timestamp).toString(QStringLiteral("MMM d, h:mm AP"));
     case ReadRole:      return it.read;
     case StarredRole:   return it.starred;
+    case TrashedRole:   return it.trashed;
     default:            return QVariant();
     }
 }
@@ -57,6 +58,7 @@ QHash<int, QByteArray> MailModel::roleNames() const
     roles[DateRole] = "date";
     roles[ReadRole] = "read";
     roles[StarredRole] = "starred";
+    roles[TrashedRole] = "trashed";
     return roles;
 }
 
@@ -80,6 +82,7 @@ void MailModel::reload()
             it.timestamp = q.value(QStringLiteral("timestamp")).toLongLong();
             it.read = q.value(QStringLiteral("is_read")).toBool();
             it.starred = q.value(QStringLiteral("is_starred")).toBool();
+            it.trashed = q.value(QStringLiteral("is_trashed")).toBool();
             m_items.append(it);
         }
     } else {
@@ -288,4 +291,71 @@ QVariantMap MailModel::get(int row) const
     m[QStringLiteral("body")] = it.body;
     m[QStringLiteral("date")] = QDateTime::fromMSecsSinceEpoch(it.timestamp).toString(QStringLiteral("MMM d, yyyy h:mm AP"));
     return m;
+}
+
+QVariantMap MailModel::getById(int id) const
+{
+    for (int i = 0; i < m_items.size(); ++i)
+        if (m_items.at(i).id == id)
+            return get(i);
+    return QVariantMap();
+}
+
+int MailModel::trashCount() const
+{
+    int n = 0;
+    for (const MailItem &it : m_items)
+        if (it.trashed)
+            ++n;
+    return n;
+}
+
+void MailModel::setTrashed(int id, bool trashed)
+{
+    QSqlQuery q(Database::instance()->connection());
+    q.prepare(QStringLiteral("UPDATE emails SET is_trashed = ? WHERE id = ?"));
+    q.addBindValue(trashed ? 1 : 0);
+    q.addBindValue(id);
+    q.exec();
+
+    for (int i = 0; i < m_items.size(); ++i) {
+        if (m_items.at(i).id == id) {
+            m_items[i].trashed = trashed;
+            emit dataChanged(index(i), index(i), { TrashedRole });
+            break;
+        }
+    }
+    emit trashCountChanged();
+}
+
+void MailModel::trash(int id)
+{
+    setTrashed(id, true);
+}
+
+void MailModel::restore(int id)
+{
+    setTrashed(id, false);
+}
+
+void MailModel::purge(int id)
+{
+    remove(id);
+    emit trashCountChanged();
+}
+
+void MailModel::emptyTrash()
+{
+    QSqlQuery q(Database::instance()->connection());
+    q.exec(QStringLiteral("DELETE FROM emails WHERE is_trashed = 1"));
+
+    for (int i = m_items.size() - 1; i >= 0; --i) {
+        if (m_items.at(i).trashed) {
+            beginRemoveRows(QModelIndex(), i, i);
+            m_items.removeAt(i);
+            endRemoveRows();
+        }
+    }
+    emit countChanged();
+    emit trashCountChanged();
 }

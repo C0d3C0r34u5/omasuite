@@ -16,6 +16,10 @@ Rectangle {
         return Accounts.count > 0 ? Accounts.accounts[0].id : 0
     }
 
+    function openCompose() {
+        composePopup.open()
+    }
+
     Connections {
         target: Sync
         function onMailBodyFetched(uid, body) {
@@ -95,7 +99,7 @@ Rectangle {
                     id: mailList
                     anchors.fill: parent
                     clip: true
-                    model: AppCore.mail
+                    model: AppCore.mailInbox
                     currentIndex: mailView.selectedIndex
 
                     Text {
@@ -168,7 +172,7 @@ Rectangle {
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
                                 mailView.selectedIndex = index
-                                mailView.selectedMail = AppCore.mail.get(index)
+                                mailView.selectedMail = AppCore.mail.getById(model.id)
                                 mailView.selectedBody = mailView.selectedMail.body
                                 mailView.selectedUid = mailView.selectedMail.uid
                                 if (!model.read)
@@ -192,13 +196,29 @@ Rectangle {
                     anchors.margins: 24
                     spacing: 8
 
-                    Text {
+                    RowLayout {
                         Layout.fillWidth: true
-                        text: mailView.selectedMail ? mailView.selectedMail.subject : "Select a message"
-                        font.pixelSize: 20
-                        font.weight: Font.DemiBold
-                        color: Theme.textPrimary
-                        elide: Text.ElideRight
+                        spacing: 12
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: mailView.selectedMail ? mailView.selectedMail.subject : "Select a message"
+                            font.pixelSize: 20
+                            font.weight: Font.DemiBold
+                            color: Theme.textPrimary
+                            elide: Text.ElideRight
+                        }
+
+                        Button {
+                            text: "Move to Trash"
+                            flat: true
+                            visible: mailView.selectedMail !== null
+                            onClicked: {
+                                AppCore.mail.trash(mailView.selectedMail.id)
+                                mailView.selectedMail = null
+                                mailView.selectedIndex = -1
+                            }
+                        }
                     }
 
                     Text {

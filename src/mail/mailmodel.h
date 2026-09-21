@@ -16,12 +16,14 @@ struct MailItem {
     qint64 timestamp = 0;
     bool read = false;
     bool starred = false;
+    bool trashed = false;
 };
 
 class MailModel : public QAbstractListModel
 {
     Q_OBJECT
     Q_PROPERTY(int count READ count NOTIFY countChanged)
+    Q_PROPERTY(int trashCount READ trashCount NOTIFY trashCountChanged)
 
 public:
     enum Roles {
@@ -36,7 +38,8 @@ public:
         TimestampRole,
         DateRole,
         ReadRole,
-        StarredRole
+        StarredRole,
+        TrashedRole
     };
     Q_ENUM(Roles)
 
@@ -47,6 +50,7 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     int count() const { return m_items.size(); }
+    int trashCount() const;
 
     Q_INVOKABLE void reload();
     Q_INVOKABLE int add(int accountId, const QString &subject, const QString &sender,
@@ -60,11 +64,19 @@ public:
     Q_INVOKABLE void setRead(int id, bool read);
     Q_INVOKABLE void toggleStarred(int id);
     Q_INVOKABLE QVariantMap get(int row) const;
+    Q_INVOKABLE QVariantMap getById(int id) const;
+    Q_INVOKABLE void trash(int id);
+    Q_INVOKABLE void restore(int id);
+    Q_INVOKABLE void purge(int id);
+    Q_INVOKABLE void emptyTrash();
 
 signals:
     void countChanged();
+    void trashCountChanged();
 
 private:
+    void setTrashed(int id, bool trashed);
+
     QList<MailItem> m_items;
 };
 

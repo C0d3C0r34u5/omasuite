@@ -17,6 +17,11 @@ AppCore::AppCore(QObject *parent)
     m_tasks = new TaskModel(this);
     m_oauth = new OAuth2Manager(this);
     m_sync = new SyncController(m_accounts, m_mail, m_calendar, m_contacts, m_tasks, m_oauth, this);
+
+    m_mailInbox = new MailFilterModel(MailFilterModel::Inbox, this);
+    m_mailInbox->setSourceModel(m_mail);
+    m_mailTrash = new MailFilterModel(MailFilterModel::Trash, this);
+    m_mailTrash->setSourceModel(m_mail);
 }
 
 QVariantList AppCore::providers() const
