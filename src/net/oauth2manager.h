@@ -13,15 +13,15 @@ class OAuth2Manager : public QObject
 public:
     explicit OAuth2Manager(QObject *parent = nullptr);
 
-    bool hasTokens(const QString &email) const;
-    QString accessToken(const QString &email) const;
-    QString refreshToken(const QString &email) const;
+    Q_INVOKABLE bool hasTokens(const QString &email) const;
+    Q_INVOKABLE QString accessToken(const QString &email) const;
+    Q_INVOKABLE QString refreshToken(const QString &email) const;
     void storeTokens(const QString &email, const QString &access, const QString &refresh);
 
-    void authorize(const QString &provider, const QString &email, const QString &clientId,
+    Q_INVOKABLE void authorize(const QString &provider, const QString &email, const QString &clientId,
                    const QString &clientSecret = QString());
     void authorize(Account *account);
-    void refresh(const QString &provider, const QString &email, const QString &clientId,
+    Q_INVOKABLE void refresh(const QString &provider, const QString &email, const QString &clientId,
                  const QString &clientSecret = QString());
 
 signals:
