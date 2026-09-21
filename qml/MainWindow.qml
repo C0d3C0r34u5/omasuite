@@ -14,15 +14,88 @@ Rectangle {
 
     property int navIndex: 0
 
+    // Shared menu styling (matches Theme palette)
+    Component {
+        id: menuBarItemDelegate
+        MenuBarItem {
+            id: barItem
+            contentItem: Text {
+                text: barItem.text
+                font: barItem.font
+                color: barItem.highlighted ? Theme.textPrimary : Theme.textSecondary
+                horizontalAlignment: Text.AlignLeft
+                verticalAlignment: Text.AlignVCenter
+                leftPadding: 12
+                rightPadding: 12
+            }
+            background: Rectangle {
+                color: barItem.highlighted ? Theme.accentLight : "transparent"
+                radius: 4
+            }
+        }
+    }
+
+    Component {
+        id: menuItemDelegate
+        MenuItem {
+            id: control
+            implicitWidth: 220
+            implicitHeight: control.separator ? 9 : 34
+
+            contentItem: Text {
+                text: control.text
+                font: control.font
+                color: control.enabled ? Theme.textPrimary : Theme.textFaint
+                elide: Text.ElideRight
+                horizontalAlignment: Text.AlignLeft
+                verticalAlignment: Text.AlignVCenter
+                leftPadding: 16
+                rightPadding: 16
+                visible: !control.separator
+            }
+
+            background: Rectangle {
+                color: control.highlighted ? Theme.accentLight : "transparent"
+                radius: 4
+
+                Rectangle {
+                    visible: control.separator
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.leftMargin: 8
+                    anchors.rightMargin: 8
+                    anchors.verticalCenter: parent.verticalCenter
+                    height: 1
+                    color: Theme.border
+                }
+            }
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
 
         MenuBar {
             Layout.fillWidth: true
+            delegate: menuBarItemDelegate
+
+            background: Rectangle {
+                color: Theme.surface
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    height: 1
+                    color: Theme.border
+                }
+            }
 
             Menu {
                 title: "File"
+                delegate: menuItemDelegate
+                background: Rectangle { color: Theme.surface; border.color: Theme.border; radius: 4 }
                 Action { text: "New Message"; onTriggered: mailView.openCompose() }
                 Action { text: "Sync All"; onTriggered: Sync.syncAll() }
                 MenuSeparator {}
@@ -31,6 +104,8 @@ Rectangle {
 
             Menu {
                 title: "View"
+                delegate: menuItemDelegate
+                background: Rectangle { color: Theme.surface; border.color: Theme.border; radius: 4 }
                 Action { text: "Mail"; onTriggered: main.navIndex = 0 }
                 Action { text: "Calendar"; onTriggered: main.navIndex = 1 }
                 Action { text: "Contacts"; onTriggered: main.navIndex = 2 }
@@ -40,6 +115,8 @@ Rectangle {
 
             Menu {
                 title: "Help"
+                delegate: menuItemDelegate
+                background: Rectangle { color: Theme.surface; border.color: Theme.border; radius: 4 }
                 Action { text: "About OmaSuite"; onTriggered: aboutDialog.open() }
             }
         }
@@ -237,10 +314,29 @@ Rectangle {
         anchors.centerIn: parent
         standardButtons: Dialog.Ok
 
+        background: Rectangle {
+            color: Theme.surface
+            border.color: Theme.border
+            radius: 8
+        }
+
+        header: Label {
+            text: aboutDialog.title
+            font.pixelSize: 16
+            font.weight: Font.DemiBold
+            color: Theme.textPrimary
+            padding: 16
+        }
+
         Label {
             text: "OmaSuite " + AppCore.appVersion + "\n\nAll-in-one mail, calendar, contacts and tasks."
+            color: Theme.textSecondary
             wrapMode: Text.WordWrap
             width: 300
+            leftPadding: 16
+            rightPadding: 16
+            topPadding: 8
+            bottomPadding: 8
         }
     }
 
