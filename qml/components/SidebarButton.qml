@@ -13,8 +13,8 @@ Rectangle {
     property color accent: Theme.accent
     signal clicked()
 
-    width: parent.width
-    height: 42
+    Layout.fillWidth: true
+    Layout.preferredHeight: 42
     radius: 8
     color: active ? Qt.rgba(accent.r, accent.g, accent.b, 0.12) : (hoverArea.containsMouse ? Theme.hoverOverlay : "transparent")
 
