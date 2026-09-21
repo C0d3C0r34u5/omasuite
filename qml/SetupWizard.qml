@@ -45,7 +45,7 @@ Item {
         id: welcomePage
 
         Rectangle {
-            color: "#F3F4F6"
+            color: Theme.bg
 
             ColumnLayout {
                 anchors.centerIn: parent
@@ -57,7 +57,7 @@ Item {
                     width: 84
                     height: 84
                     radius: 20
-                    color: "#0F6CBD"
+                    color: Theme.accent
 
                     Text {
                         anchors.centerIn: parent
@@ -74,14 +74,14 @@ Item {
                     text: "Welcome to OmaSuite"
                     font.pixelSize: 26
                     font.weight: Font.DemiBold
-                    color: "#1F1F1F"
+                    color: Theme.textPrimary
                 }
 
                 Text {
                     Layout.alignment: Qt.AlignHCenter
                     text: "Mail, calendar, contacts and tasks — all in one place."
                     font.pixelSize: 14
-                    color: "#666666"
+                    color: Theme.textMuted
                     horizontalAlignment: Text.AlignHCenter
                     Layout.maximumWidth: 380
                 }
@@ -91,7 +91,7 @@ Item {
                     Layout.topMargin: 8
                     text: "Start by adding your first email account."
                     font.pixelSize: 13
-                    color: "#444444"
+                    color: Theme.textSecondary
                 }
 
                 Button {
@@ -102,7 +102,7 @@ Item {
                     onClicked: stack.push(providerPage)
 
                     background: Rectangle {
-                        color: parent.hovered ? "#0A5CAD" : "#0F6CBD"
+                        color: parent.hovered ? Theme.accentHover : Theme.accent
                         radius: 8
                     }
                     contentItem: Text {
@@ -122,7 +122,7 @@ Item {
         id: providerPage
 
         Rectangle {
-            color: "#F3F4F6"
+            color: Theme.bg
 
             ColumnLayout {
                 anchors.fill: parent
@@ -143,7 +143,7 @@ Item {
                         text: "Choose your provider"
                         font.pixelSize: 22
                         font.weight: Font.DemiBold
-                        color: "#1F1F1F"
+                        color: Theme.textPrimary
                     }
                 }
 
@@ -151,7 +151,7 @@ Item {
                     Layout.leftMargin: 4
                     text: "Select the service for the account you want to add."
                     font.pixelSize: 13
-                    color: "#666666"
+                    color: Theme.textMuted
                 }
 
                 Rectangle {
@@ -190,7 +190,7 @@ Item {
         id: detailsPage
 
         Rectangle {
-            color: "#F3F4F6"
+            color: Theme.bg
 
             property string providerId: wizard.selectedProvider.id
             property string providerBrand: wizard.selectedProvider.brand
@@ -214,7 +214,7 @@ Item {
                         text: "Add " + detailsPage.providerBrand + " account"
                         font.pixelSize: 22
                         font.weight: Font.DemiBold
-                        color: "#1F1F1F"
+                        color: Theme.textPrimary
                     }
                 }
 
@@ -230,19 +230,25 @@ Item {
 
                         Rectangle {
                             Layout.fillWidth: true
+                            implicitHeight: formColumn.implicitHeight + 40
                             radius: 12
-                            color: "#FFFFFF"
+                            color: Theme.surface
                             border.width: 1
-                            border.color: "#E0E0E0"
+                            border.color: Theme.border
 
                             ColumnLayout {
-                                anchors.fill: parent
-                                anchors.margins: 20
+                                id: formColumn
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.top: parent.top
+                                anchors.leftMargin: 20
+                                anchors.rightMargin: 20
+                                anchors.topMargin: 20
                                 spacing: 14
 
                                 // Display name
                                 ColumnLayout { Layout.fillWidth: true; spacing: 4
-                                    Text { text: "Display name"; font.pixelSize: 12; color: "#444444" }
+                                    Text { text: "Display name"; font.pixelSize: 12; color: Theme.textSecondary }
                                     TextField {
                                         id: nameField
                                         Layout.fillWidth: true
@@ -253,7 +259,7 @@ Item {
 
                                 // Email
                                 ColumnLayout { Layout.fillWidth: true; spacing: 4
-                                    Text { text: "Email address"; font.pixelSize: 12; color: "#444444" }
+                                    Text { text: "Email address"; font.pixelSize: 12; color: Theme.textSecondary }
                                     TextField {
                                         id: emailField
                                         Layout.fillWidth: true
@@ -274,7 +280,7 @@ Item {
                                 // Password
                                 ColumnLayout { Layout.fillWidth: true; spacing: 4
                                     visible: authMethodCombo.currentIndex === 0
-                                    Text { text: "Password or app password"; font.pixelSize: 12; color: "#444444" }
+                                    Text { text: "Password or app password"; font.pixelSize: 12; color: Theme.textSecondary }
                                     TextField {
                                         id: passwordField
                                         Layout.fillWidth: true
@@ -286,7 +292,7 @@ Item {
 
                                 // Authentication method
                                 RowLayout { Layout.fillWidth: true; spacing: 8
-                                    Text { text: "Sign in with"; font.pixelSize: 13; color: "#444444" }
+                                    Text { text: "Sign in with"; font.pixelSize: 13; color: Theme.textSecondary }
                                     ComboBox {
                                         id: authMethodCombo
                                         model: wizard.selectedProvider.supportsOAuth ? ["App password", "OAuth2 (browser)"] : ["App password"]
@@ -297,7 +303,7 @@ Item {
                                 // OAuth client id (advanced)
                                 ColumnLayout { Layout.fillWidth: true; spacing: 4
                                     visible: authMethodCombo.currentIndex === 1
-                                    Text { text: "OAuth client ID (optional)"; font.pixelSize: 12; color: "#444444" }
+                                    Text { text: "OAuth client ID (optional)"; font.pixelSize: 12; color: Theme.textSecondary }
                                     TextField {
                                         id: oauthClientIdField
                                         Layout.fillWidth: true
@@ -309,7 +315,7 @@ Item {
                                 // OAuth client secret (only some providers, e.g. Yahoo)
                                 ColumnLayout { Layout.fillWidth: true; spacing: 4
                                     visible: authMethodCombo.currentIndex === 1
-                                    Text { text: "OAuth client secret (optional)"; font.pixelSize: 12; color: "#444444" }
+                                    Text { text: "OAuth client secret (optional)"; font.pixelSize: 12; color: Theme.textSecondary }
                                     TextField {
                                         id: oauthClientSecretField
                                         Layout.fillWidth: true
@@ -323,7 +329,7 @@ Item {
                                     id: oauthErrorText
                                     Layout.fillWidth: true
                                     visible: false
-                                    color: "#D13438"
+                                    color: Theme.danger
                                     font.pixelSize: 12
                                     wrapMode: Text.Wrap
                                 }
@@ -345,36 +351,36 @@ Item {
                                     Rectangle {
                                         Layout.fillWidth: true
                                         height: 1
-                                        color: "#E0E0E0"
+                                        color: Theme.border
                                     }
 
-                                    Text { text: "Incoming (IMAP)"; font.pixelSize: 13; font.weight: Font.DemiBold; color: "#1F1F1F" }
+                                    Text { text: "Incoming (IMAP)"; font.pixelSize: 13; font.weight: Font.DemiBold; color: Theme.textPrimary }
                                     RowLayout { Layout.fillWidth: true; spacing: 8
                                         TextField { id: imapHostField; Layout.fillWidth: true; placeholderText: "IMAP server"; text: wizard.selectedProvider.imapHost ? wizard.selectedProvider.imapHost : "" }
                                         SpinBox { id: imapPortField; from: 1; to: 65535; value: wizard.selectedProvider.imapPort ? wizard.selectedProvider.imapPort : 993; editable: true }
                                     }
 
-                                    Text { text: "Outgoing (SMTP)"; font.pixelSize: 13; font.weight: Font.DemiBold; color: "#1F1F1F" }
+                                    Text { text: "Outgoing (SMTP)"; font.pixelSize: 13; font.weight: Font.DemiBold; color: Theme.textPrimary }
                                     RowLayout { Layout.fillWidth: true; spacing: 8
                                         TextField { id: smtpHostField; Layout.fillWidth: true; placeholderText: "SMTP server"; text: wizard.selectedProvider.smtpHost ? wizard.selectedProvider.smtpHost : "" }
                                         SpinBox { id: smtpPortField; from: 1; to: 65535; value: wizard.selectedProvider.smtpPort ? wizard.selectedProvider.smtpPort : 465; editable: true }
                                     }
 
-                                    Text { text: "Calendar (CalDAV)"; font.pixelSize: 13; font.weight: Font.DemiBold; color: "#1F1F1F" }
+                                    Text { text: "Calendar (CalDAV)"; font.pixelSize: 13; font.weight: Font.DemiBold; color: Theme.textPrimary }
                                     TextField { id: caldavField; Layout.fillWidth: true; placeholderText: "https://..."; text: wizard.selectedProvider.caldavUrl ? wizard.selectedProvider.caldavUrl : "" }
 
-                                    Text { text: "Contacts (CardDAV)"; font.pixelSize: 13; font.weight: Font.DemiBold; color: "#1F1F1F" }
+                                    Text { text: "Contacts (CardDAV)"; font.pixelSize: 13; font.weight: Font.DemiBold; color: Theme.textPrimary }
                                     TextField { id: carddavField; Layout.fillWidth: true; placeholderText: "https://..."; text: wizard.selectedProvider.carddavUrl ? wizard.selectedProvider.carddavUrl : "" }
 
                                     ColumnLayout { Layout.fillWidth: true; spacing: 4
                                         visible: wizard.selectedProvider.id === "exchange"
-                                        Text { text: "Exchange Web Services URL"; font.pixelSize: 13; font.weight: Font.DemiBold; color: "#1F1F1F" }
+                                        Text { text: "Exchange Web Services URL"; font.pixelSize: 13; font.weight: Font.DemiBold; color: Theme.textPrimary }
                                         TextField { id: ewsUrlField; Layout.fillWidth: true; placeholderText: "https://outlook.office365.com/EWS/Exchange.asmx"; text: wizard.selectedProvider.ewsUrl ? wizard.selectedProvider.ewsUrl : "" }
                                     }
 
                                     RowLayout { Layout.fillWidth: true; spacing: 8
                                         CheckBox { id: allowUntrustedBox }
-                                        Text { text: "Trust invalid TLS certificate (self-signed servers)"; font.pixelSize: 12; color: "#666666" }
+                                        Text { text: "Trust invalid TLS certificate (self-signed servers)"; font.pixelSize: 12; color: Theme.textMuted }
                                     }
                                 }
                             }
@@ -417,7 +423,7 @@ Item {
                             }
 
                             background: Rectangle {
-                                color: parent.enabled ? (parent.hovered ? "#0A5CAD" : "#0F6CBD") : "#B0B0B0"
+                                color: parent.enabled ? (parent.hovered ? Theme.accentHover : Theme.accent) : Theme.accentDisabled
                                 radius: 8
                             }
                             contentItem: Text {
@@ -439,7 +445,7 @@ Item {
         id: donePage
 
         Rectangle {
-            color: "#F3F4F6"
+            color: Theme.bg
 
             ColumnLayout {
                 anchors.centerIn: parent
@@ -451,7 +457,7 @@ Item {
                     width: 84
                     height: 84
                     radius: 42
-                    color: "#0F6CBD"
+                    color: Theme.accent
 
                     Text {
                         anchors.centerIn: parent
@@ -467,14 +473,14 @@ Item {
                     text: "You're all set!"
                     font.pixelSize: 26
                     font.weight: Font.DemiBold
-                    color: "#1F1F1F"
+                    color: Theme.textPrimary
                 }
 
                 Text {
                     Layout.alignment: Qt.AlignHCenter
                     text: "Your account has been added. You can add more accounts anytime from Settings."
                     font.pixelSize: 13
-                    color: "#666666"
+                    color: Theme.textMuted
                     horizontalAlignment: Text.AlignHCenter
                     Layout.maximumWidth: 360
                 }
@@ -487,7 +493,7 @@ Item {
                     onClicked: stack.clear()
 
                     background: Rectangle {
-                        color: parent.hovered ? "#0A5CAD" : "#0F6CBD"
+                        color: parent.hovered ? Theme.accentHover : Theme.accent
                         radius: 8
                     }
                     contentItem: Text {

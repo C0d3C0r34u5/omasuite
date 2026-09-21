@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import OmaSuite 1.0
 
 Rectangle {
     id: root
@@ -8,13 +9,13 @@ Rectangle {
     property string label: ""
     property string symbol: ""
     property bool active: false
-    property color accent: "#0F6CBD"
+    property color accent: Theme.accent
     signal clicked()
 
     width: parent.width
     height: 42
     radius: 8
-    color: active ? Qt.rgba(accent.r, accent.g, accent.b, 0.12) : (hoverArea.containsMouse ? "#0000000A" : "transparent")
+    color: active ? Qt.rgba(accent.r, accent.g, accent.b, 0.12) : (hoverArea.containsMouse ? Theme.hoverOverlay : "transparent")
 
     RowLayout {
         anchors.fill: parent
@@ -25,7 +26,7 @@ Rectangle {
         Text {
             text: root.symbol
             font.pixelSize: 16
-            color: active ? root.accent : "#555555"
+            color: active ? root.accent : Theme.textSecondary
             Layout.preferredWidth: 22
             horizontalAlignment: Text.AlignHCenter
         }
@@ -34,7 +35,7 @@ Rectangle {
             text: root.label
             font.pixelSize: 14
             font.weight: active ? Font.DemiBold : Font.Normal
-            color: active ? "#1F1F1F" : "#444444"
+            color: active ? Theme.textPrimary : Theme.textSecondary
             Layout.fillWidth: true
         }
     }

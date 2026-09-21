@@ -5,7 +5,7 @@ import OmaSuite 1.0
 
 Rectangle {
     id: mailView
-    color: "#F3F4F6"
+    color: Theme.bg
 
     property int selectedIndex: -1
     property var selectedMail: null
@@ -33,9 +33,9 @@ Rectangle {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 56
-            color: "#FFFFFF"
+            color: Theme.surface
             border.width: 1
-            border.color: "#E0E0E0"
+            border.color: Theme.border
 
             RowLayout {
                 anchors.fill: parent
@@ -47,7 +47,7 @@ Rectangle {
                     text: "Mail"
                     font.pixelSize: 20
                     font.weight: Font.DemiBold
-                    color: "#1F1F1F"
+                    color: Theme.textPrimary
                 }
 
                 Item { Layout.fillWidth: true }
@@ -64,7 +64,7 @@ Rectangle {
                     onClicked: composePopup.open()
 
                     background: Rectangle {
-                        color: parent.hovered ? "#0A5CAD" : "#0F6CBD"
+                        color: parent.hovered ? Theme.accentHover : Theme.accent
                         radius: 8
                     }
                     contentItem: Text {
@@ -87,9 +87,9 @@ Rectangle {
             Rectangle {
                 Layout.preferredWidth: 360
                 Layout.fillHeight: true
-                color: "#FFFFFF"
+                color: Theme.surface
                 border.width: 1
-                border.color: "#E0E0E0"
+                border.color: Theme.border
 
                 ListView {
                     id: mailList
@@ -101,7 +101,7 @@ Rectangle {
                     Text {
                         anchors.centerIn: parent
                         text: "No messages yet"
-                        color: "#999999"
+                        color: Theme.textFaint
                         font.pixelSize: 14
                         visible: mailList.count === 0
                     }
@@ -109,7 +109,7 @@ Rectangle {
                     delegate: Rectangle {
                         width: mailList.width
                         height: 78
-                        color: mailList.currentIndex === index ? "#E8F1FB" : "transparent"
+                        color: mailList.currentIndex === index ? Theme.accentLight : "transparent"
 
                         ColumnLayout {
                             anchors.fill: parent
@@ -127,21 +127,21 @@ Rectangle {
                                     text: model.sender
                                     font.pixelSize: 14
                                     font.weight: model.read ? Font.Normal : Font.DemiBold
-                                    color: "#1F1F1F"
+                                    color: Theme.textPrimary
                                     elide: Text.ElideRight
                                     Layout.fillWidth: true
                                 }
 
                                 Text {
                                     text: model.starred ? "\u2605" : "\u2606"
-                                    color: model.starred ? "#F2C811" : "#BBBBBB"
+                                    color: model.starred ? Theme.star : Theme.textFaint
                                     font.pixelSize: 14
                                 }
 
                                 Text {
                                     text: model.date
                                     font.pixelSize: 11
-                                    color: model.read ? "#999999" : "#0F6CBD"
+                                    color: model.read ? Theme.textFaint : Theme.accent
                                 }
                             }
 
@@ -149,7 +149,7 @@ Rectangle {
                                 text: model.subject
                                 font.pixelSize: 13
                                 font.weight: model.read ? Font.Normal : Font.DemiBold
-                                color: "#333333"
+                                color: Theme.textBody
                                 elide: Text.ElideRight
                                 Layout.fillWidth: true
                             }
@@ -157,7 +157,7 @@ Rectangle {
                             Text {
                                 text: model.preview
                                 font.pixelSize: 12
-                                color: "#888888"
+                                color: Theme.textFaint
                                 elide: Text.ElideRight
                                 Layout.fillWidth: true
                             }
@@ -185,7 +185,7 @@ Rectangle {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                color: "#FFFFFF"
+                color: Theme.surface
 
                 ColumnLayout {
                     anchors.fill: parent
@@ -197,26 +197,26 @@ Rectangle {
                         text: mailView.selectedMail ? mailView.selectedMail.subject : "Select a message"
                         font.pixelSize: 20
                         font.weight: Font.DemiBold
-                        color: "#1F1F1F"
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                     }
 
                     Text {
                         text: mailView.selectedMail ? ("From: " + mailView.selectedMail.sender) : ""
                         font.pixelSize: 13
-                        color: "#666666"
+                        color: Theme.textMuted
                     }
 
                     Text {
                         text: mailView.selectedMail ? ("To: " + mailView.selectedMail.recipient) : ""
                         font.pixelSize: 13
-                        color: "#666666"
+                        color: Theme.textMuted
                     }
 
                     Text {
                         text: mailView.selectedMail ? mailView.selectedMail.date : ""
                         font.pixelSize: 12
-                        color: "#999999"
+                        color: Theme.textFaint
                     }
 
                     Rectangle {
@@ -224,7 +224,7 @@ Rectangle {
                         Layout.preferredHeight: 1
                         Layout.topMargin: 4
                         Layout.bottomMargin: 4
-                        color: "#E0E0E0"
+                        color: Theme.border
                     }
 
                     ScrollView {
@@ -235,7 +235,7 @@ Rectangle {
                             width: parent.width
                             text: mailView.selectedBody !== "" ? mailView.selectedBody : (mailView.selectedMail ? mailView.selectedMail.body : "")
                             font.pixelSize: 14
-                            color: "#333333"
+                            color: Theme.textBody
                             wrapMode: Text.Wrap
                         }
                     }
@@ -254,7 +254,7 @@ Rectangle {
         padding: 0
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-        background: Rectangle { radius: 12; color: "#FFFFFF" }
+        background: Rectangle { radius: 12; color: Theme.surface }
 
         ColumnLayout {
             anchors.fill: parent
@@ -265,7 +265,7 @@ Rectangle {
                 text: "New message"
                 font.pixelSize: 18
                 font.weight: Font.DemiBold
-                color: "#1F1F1F"
+                color: Theme.textPrimary
             }
 
             TextField {
@@ -315,7 +315,7 @@ Rectangle {
                     }
 
                     background: Rectangle {
-                        color: parent.enabled ? (parent.hovered ? "#0A5CAD" : "#0F6CBD") : "#B0B0B0"
+                        color: parent.enabled ? (parent.hovered ? Theme.accentHover : Theme.accent) : Theme.accentDisabled
                         radius: 8
                     }
                     contentItem: Text {

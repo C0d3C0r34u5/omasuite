@@ -10,7 +10,7 @@ import "tasks"
 
 Rectangle {
     id: main
-    color: "#F3F4F6"
+    color: Theme.bg
 
     property int navIndex: 0
 
@@ -22,7 +22,7 @@ Rectangle {
         Rectangle {
             Layout.preferredWidth: 220
             Layout.fillHeight: true
-            color: "#ECEEF1"
+            color: Theme.sidebar
 
             ColumnLayout {
                 anchors.fill: parent
@@ -39,7 +39,7 @@ Rectangle {
                         width: 34
                         height: 34
                         radius: 8
-                        color: "#0F6CBD"
+                        color: Theme.accent
 
                         Text {
                             anchors.centerIn: parent
@@ -54,7 +54,7 @@ Rectangle {
                         text: "OmaSuite"
                         font.pixelSize: 17
                         font.weight: Font.DemiBold
-                        color: "#1F1F1F"
+                        color: Theme.textPrimary
                     }
                 }
 
@@ -94,7 +94,7 @@ Rectangle {
                     text: "Accounts"
                     font.pixelSize: 11
                     font.weight: Font.DemiBold
-                    color: "#888888"
+                    color: Theme.textFaint
                     Layout.leftMargin: 12
                     Layout.bottomMargin: 2
                 }
@@ -127,7 +127,7 @@ Rectangle {
                         Text {
                             text: modelData.email
                             font.pixelSize: 12
-                            color: "#444444"
+                            color: Theme.textSecondary
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
@@ -148,7 +148,7 @@ Rectangle {
                     Layout.leftMargin: 8
                     Layout.rightMargin: 8
                     radius: 8
-                    color: "#E0E2E6"
+                    color: Theme.sidebarAlt
 
                     ColumnLayout {
                         anchors.fill: parent
@@ -165,7 +165,7 @@ Rectangle {
                             Layout.fillWidth: true
                             text: Sync.status
                             font.pixelSize: 11
-                            color: "#666666"
+                            color: Theme.textMuted
                             elide: Text.ElideRight
                             visible: Sync.status !== ""
                             wrapMode: Text.Wrap
@@ -200,7 +200,7 @@ Rectangle {
 
         background: Rectangle {
             radius: 12
-            color: "#F3F4F6"
+            color: Theme.bg
         }
 
         SetupWizard {

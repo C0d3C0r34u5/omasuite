@@ -5,7 +5,7 @@ import OmaSuite 1.0
 
 Rectangle {
     id: tasksView
-    color: "#F3F4F6"
+    color: Theme.bg
 
     property int filter: 0 // 0 = all, 1 = pending, 2 = completed
 
@@ -21,9 +21,9 @@ Rectangle {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 56
-            color: "#FFFFFF"
+            color: Theme.surface
             border.width: 1
-            border.color: "#E0E0E0"
+            border.color: Theme.border
 
             RowLayout {
                 anchors.fill: parent
@@ -35,13 +35,13 @@ Rectangle {
                     text: "Tasks"
                     font.pixelSize: 20
                     font.weight: Font.DemiBold
-                    color: "#1F1F1F"
+                    color: Theme.textPrimary
                 }
 
                 Text {
                     text: AppCore.tasks.pendingCount + " pending"
                     font.pixelSize: 13
-                    color: "#888888"
+                    color: Theme.textFaint
                 }
 
                 Item { Layout.fillWidth: true }
@@ -69,7 +69,7 @@ Rectangle {
                     onClicked: { taskDialog.reset(); taskDialog.open() }
 
                     background: Rectangle {
-                        color: parent.hovered ? "#0A5CAD" : "#0F6CBD"
+                        color: parent.hovered ? Theme.accentHover : Theme.accent
                         radius: 8
                     }
                     contentItem: Text {
@@ -96,7 +96,7 @@ Rectangle {
             Text {
                 anchors.centerIn: parent
                 text: "No tasks yet"
-                color: "#999999"
+                color: Theme.textFaint
                 visible: taskList.count === 0
             }
 
@@ -104,9 +104,9 @@ Rectangle {
                 width: taskList.width
                 height: 60
                 radius: 8
-                color: "#FFFFFF"
+                color: Theme.surface
                 border.width: 1
-                border.color: "#E8E8E8"
+                border.color: Theme.border
                 visible: {
                     if (tasksView.filter === 0) return true
                     if (tasksView.filter === 1) return !model.completed
@@ -132,7 +132,7 @@ Rectangle {
                             text: model.title
                             font.pixelSize: 14
                             font.weight: Font.DemiBold
-                            color: model.completed ? "#999999" : "#1F1F1F"
+                            color: model.completed ? Theme.textFaint : Theme.textPrimary
                             font.strikeout: model.completed
                             elide: Text.ElideRight
                             Layout.fillWidth: true
@@ -141,7 +141,7 @@ Rectangle {
                         Text {
                             text: model.dueDate ? ("Due " + model.dueDate) : ""
                             font.pixelSize: 11
-                            color: "#888888"
+                            color: Theme.textFaint
                         }
                     }
 
@@ -170,7 +170,7 @@ Rectangle {
             hasDue.checked = false
         }
 
-        background: Rectangle { radius: 12; color: "#FFFFFF" }
+        background: Rectangle { radius: 12; color: Theme.surface }
 
         ColumnLayout {
             anchors.fill: parent
@@ -181,7 +181,7 @@ Rectangle {
                 text: "New task"
                 font.pixelSize: 18
                 font.weight: Font.DemiBold
-                color: "#1F1F1F"
+                color: Theme.textPrimary
             }
 
             TextField {
@@ -199,12 +199,12 @@ Rectangle {
 
             RowLayout { Layout.fillWidth: true; spacing: 8
                 CheckBox { id: hasDue }
-                Text { text: "Has due date"; font.pixelSize: 13; color: "#444444" }
+                Text { text: "Has due date"; font.pixelSize: 13; color: Theme.textSecondary }
                 Item { Layout.fillWidth: true }
             }
 
             RowLayout { Layout.fillWidth: true; spacing: 8
-                Text { text: "Due date"; font.pixelSize: 13; color: "#444444" }
+                Text { text: "Due date"; font.pixelSize: 13; color: Theme.textSecondary }
                 TextField {
                     id: dueField
                     Layout.fillWidth: true
@@ -234,7 +234,7 @@ Rectangle {
                     }
 
                     background: Rectangle {
-                        color: parent.enabled ? (parent.hovered ? "#0A5CAD" : "#0F6CBD") : "#B0B0B0"
+                        color: parent.enabled ? (parent.hovered ? Theme.accentHover : Theme.accent) : Theme.accentDisabled
                         radius: 8
                     }
                     contentItem: Text {

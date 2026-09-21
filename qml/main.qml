@@ -12,15 +12,15 @@ ApplicationWindow {
     title: "OmaSuite"
 
     // Palette
-    readonly property color accent: "#0F6CBD"
-    readonly property color accentLight: "#E8F1FB"
-    readonly property color bg: "#F3F4F6"
-    readonly property color surface: "#FFFFFF"
-    readonly property color textPrimary: "#1F1F1F"
-    readonly property color textMuted: "#666666"
-    readonly property color border: "#E0E0E0"
-    readonly property color sidebar: "#ECEEF1"
-    readonly property color danger: "#D13438"
+    readonly property color accent: Theme.accent
+    readonly property color accentLight: Theme.accentLight
+    readonly property color bg: Theme.bg
+    readonly property color surface: Theme.surface
+    readonly property color textPrimary: Theme.textPrimary
+    readonly property color textMuted: Theme.textMuted
+    readonly property color border: Theme.border
+    readonly property color sidebar: Theme.sidebar
+    readonly property color danger: Theme.danger
 
     Loader {
         anchors.fill: parent

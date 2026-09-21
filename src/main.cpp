@@ -12,6 +12,7 @@
 #include <cstdio>
 
 #include "appcore.h"
+#include "theme.h"
 #include "account/accountmanager.h"
 #include "account/account.h"
 #include "mail/mailmodel.h"
@@ -98,7 +99,7 @@ int main(int argc, char *argv[])
     app.setOrganizationName(QStringLiteral("Omarchy"));
     app.setOrganizationDomain(QStringLiteral("omarchy.org"));
 
-    QQuickStyle::setStyle(QStringLiteral("Basic"));
+    QQuickStyle::setStyle(QStringLiteral("Fusion"));
 
     const QStringList args = app.arguments();
     const int shotIdx = args.indexOf(QStringLiteral("--screenshot"));
@@ -119,6 +120,8 @@ int main(int argc, char *argv[])
     AppCore core;
     core.accountManager()->load();
 
+    Theme theme;
+
     if (screenshotMode)
         seedSampleData(core);
 
@@ -128,6 +131,7 @@ int main(int argc, char *argv[])
     qmlRegisterSingletonInstance("OmaSuite", 1, 0, "Accounts", core.accountManager());
     qmlRegisterSingletonInstance("OmaSuite", 1, 0, "Sync", core.syncController());
     qmlRegisterSingletonInstance("OmaSuite", 1, 0, "OAuth", core.oauthManager());
+    qmlRegisterSingletonInstance("OmaSuite", 1, 0, "Theme", &theme);
 
     QQmlApplicationEngine engine;
     engine.addImportPath(QStringLiteral("qrc:/"));

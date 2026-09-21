@@ -5,7 +5,7 @@ import OmaSuite 1.0
 
 Rectangle {
     id: calView
-    color: "#F3F4F6"
+    color: Theme.bg
 
     property date viewDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
     property var gridDays: []
@@ -43,9 +43,9 @@ Rectangle {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 56
-            color: "#FFFFFF"
+            color: Theme.surface
             border.width: 1
-            border.color: "#E0E0E0"
+            border.color: Theme.border
 
             RowLayout {
                 anchors.fill: parent
@@ -57,7 +57,7 @@ Rectangle {
                     text: "Calendar"
                     font.pixelSize: 20
                     font.weight: Font.DemiBold
-                    color: "#1F1F1F"
+                    color: Theme.textPrimary
                 }
 
                 Item { Layout.fillWidth: true }
@@ -70,7 +70,7 @@ Rectangle {
                     text: monthLabel()
                     font.pixelSize: 16
                     font.weight: Font.DemiBold
-                    color: "#1F1F1F"
+                    color: Theme.textPrimary
                     Layout.minimumWidth: 150
                     horizontalAlignment: Text.AlignHCenter
                 }
@@ -87,7 +87,7 @@ Rectangle {
                     onClicked: { eventDialog.reset(); eventDialog.open() }
 
                     background: Rectangle {
-                        color: parent.hovered ? "#0A5CAD" : "#0F6CBD"
+                        color: parent.hovered ? Theme.accentHover : Theme.accent
                         radius: 8
                     }
                     contentItem: Text {
@@ -126,7 +126,7 @@ Rectangle {
                             text: modelData
                             font.pixelSize: 12
                             font.weight: Font.DemiBold
-                            color: "#888888"
+                            color: Theme.textFaint
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
                         }
@@ -158,8 +158,8 @@ Rectangle {
                             width: dayGrid.width / 7
                             height: dayGrid.height / 6
                             border.width: 0.5
-                            border.color: "#E4E4E4"
-                            color: isSelected ? "#E8F1FB" : (inMonth ? "#FFFFFF" : "#F7F7F7")
+                            border.color: Theme.border
+                            color: isSelected ? Theme.accentLight : (inMonth ? Theme.surface : Theme.surfaceAlt)
 
                             Column {
                                 anchors.fill: parent
@@ -172,7 +172,7 @@ Rectangle {
                                     text: dayDate.getDate()
                                     font.pixelSize: 13
                                     font.weight: isToday ? Font.Bold : Font.Normal
-                                    color: isToday ? "#0F6CBD" : (inMonth ? "#333333" : "#BBBBBB")
+                                    color: isToday ? Theme.accent : (inMonth ? Theme.textBody : Theme.textFaint)
                                     width: 22
                                     height: 22
                                     horizontalAlignment: Text.AlignHCenter
@@ -185,14 +185,14 @@ Rectangle {
                                         width: parent.width - 4
                                         height: 18
                                         radius: 3
-                                        color: "#D6E7F8"
+                                        color: Theme.eventChip
                                         Text {
                                             anchors.fill: parent
                                             anchors.leftMargin: 4
                                             anchors.rightMargin: 4
                                             text: events[index].title
                                             font.pixelSize: 11
-                                            color: "#0F5C9E"
+                                            color: Theme.eventChipText
                                             elide: Text.ElideRight
                                             verticalAlignment: Text.AlignVCenter
                                         }
@@ -202,7 +202,7 @@ Rectangle {
                                 Text {
                                     text: events.length > 2 ? ("+" + (events.length - 2) + " more") : ""
                                     font.pixelSize: 10
-                                    color: "#888888"
+                                    color: Theme.textFaint
                                 }
                             }
 
@@ -222,9 +222,9 @@ Rectangle {
             Rectangle {
                 Layout.preferredWidth: 300
                 Layout.fillHeight: true
-                color: "#FFFFFF"
+                color: Theme.surface
                 border.width: 1
-                border.color: "#E0E0E0"
+                border.color: Theme.border
 
                 ColumnLayout {
                     anchors.fill: parent
@@ -235,7 +235,7 @@ Rectangle {
                         text: calView.selectedDay.toLocaleDateString(Qt.locale(), "dddd, MMM d")
                         font.pixelSize: 16
                         font.weight: Font.DemiBold
-                        color: "#1F1F1F"
+                        color: Theme.textPrimary
                         wrapMode: Text.Wrap
                         Layout.fillWidth: true
                     }
@@ -250,7 +250,7 @@ Rectangle {
                         Text {
                             anchors.centerIn: parent
                             text: "No events"
-                            color: "#999999"
+                            color: Theme.textFaint
                             visible: dayEvents.count === 0
                         }
 
@@ -258,7 +258,7 @@ Rectangle {
                             width: dayEvents.width
                             height: 52
                             radius: 8
-                            color: "#F3F6FA"
+                            color: Theme.eventCard
 
                             ColumnLayout {
                                 anchors.fill: parent
@@ -269,7 +269,7 @@ Rectangle {
                                     text: modelData.title
                                     font.pixelSize: 13
                                     font.weight: Font.DemiBold
-                                    color: "#1F1F1F"
+                                    color: Theme.textPrimary
                                     elide: Text.ElideRight
                                     Layout.fillWidth: true
                                 }
@@ -277,7 +277,7 @@ Rectangle {
                                 Text {
                                     text: (modelData.allDay ? "All day" : (modelData.startDate + " - " + modelData.endDate))
                                     font.pixelSize: 11
-                                    color: "#888888"
+                                    color: Theme.textFaint
                                 }
                             }
 
@@ -314,7 +314,7 @@ Rectangle {
             allDaySwitch.checked = false
         }
 
-        background: Rectangle { radius: 12; color: "#FFFFFF" }
+        background: Rectangle { radius: 12; color: Theme.surface }
 
         ColumnLayout {
             anchors.fill: parent
@@ -325,7 +325,7 @@ Rectangle {
                 text: "New event"
                 font.pixelSize: 18
                 font.weight: Font.DemiBold
-                color: "#1F1F1F"
+                color: Theme.textPrimary
             }
 
             TextField {
@@ -342,18 +342,18 @@ Rectangle {
             }
 
             RowLayout { Layout.fillWidth: true; spacing: 8
-                Text { text: "All day"; font.pixelSize: 13; color: "#444444" }
+                Text { text: "All day"; font.pixelSize: 13; color: Theme.textSecondary }
                 Switch { id: allDaySwitch }
                 Item { Layout.fillWidth: true }
             }
 
             GridLayout { columns: 4; Layout.fillWidth: true
-                Text { text: "Start"; font.pixelSize: 12; color: "#888888" }
+                Text { text: "Start"; font.pixelSize: 12; color: Theme.textFaint }
                 SpinBox { id: startHour; from: 0; to: 23; value: 9; editable: true }
                 Text { text: ":"; font.pixelSize: 12 }
                 SpinBox { id: startMin; from: 0; to: 59; value: 0; editable: true }
 
-                Text { text: "End"; font.pixelSize: 12; color: "#888888" }
+                Text { text: "End"; font.pixelSize: 12; color: Theme.textFaint }
                 SpinBox { id: endHour; from: 0; to: 23; value: 10; editable: true }
                 Text { text: ":"; font.pixelSize: 12 }
                 SpinBox { id: endMin; from: 0; to: 59; value: 0; editable: true }
@@ -379,7 +379,7 @@ Rectangle {
                     }
 
                     background: Rectangle {
-                        color: parent.enabled ? (parent.hovered ? "#0A5CAD" : "#0F6CBD") : "#B0B0B0"
+                        color: parent.enabled ? (parent.hovered ? Theme.accentHover : Theme.accent) : Theme.accentDisabled
                         radius: 8
                     }
                     contentItem: Text {

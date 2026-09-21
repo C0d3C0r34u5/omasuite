@@ -12,6 +12,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     src/main.cpp \
+    src/theme.cpp \
     src/appcore.cpp \
     src/storage/database.cpp \
     src/storage/secretstore.cpp \
@@ -35,6 +36,7 @@ SOURCES += \
 
 HEADERS += \
     src/appcore.h \
+    src/theme.h \
     src/storage/database.h \
     src/storage/secretstore.h \
     src/account/account.h \

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import OmaSuite 1.0
 
 // A provider card used in the setup wizard.
 Rectangle {
@@ -13,9 +14,9 @@ Rectangle {
     width: parent.width
     height: 64
     radius: 10
-    color: selected ? "#E8F1FB" : (hoverArea.containsMouse ? "#F5F6F8" : "#FFFFFF")
+    color: selected ? Theme.accentLight : (hoverArea.containsMouse ? Theme.surfaceAlt : Theme.surface)
     border.width: selected ? 2 : 1
-    border.color: selected ? "#0F6CBD" : "#E0E0E0"
+    border.color: selected ? Theme.accent : Theme.border
 
     RowLayout {
         anchors.fill: parent
@@ -26,7 +27,7 @@ Rectangle {
             Layout.preferredWidth: 40
             Layout.preferredHeight: 40
             radius: 20
-            color: provider.color ? provider.color : "#999999"
+            color: provider.color ? provider.color : Theme.textFaint
 
             Text {
                 anchors.centerIn: parent
@@ -45,13 +46,13 @@ Rectangle {
                 text: provider.brand ? provider.brand : provider.name
                 font.pixelSize: 15
                 font.weight: Font.DemiBold
-                color: "#1F1F1F"
+                color: Theme.textPrimary
             }
 
             Text {
                 text: provider.description ? provider.description : ""
                 font.pixelSize: 12
-                color: "#666666"
+                color: Theme.textMuted
                 elide: Text.ElideRight
                 Layout.fillWidth: true
             }
@@ -61,9 +62,9 @@ Rectangle {
             Layout.preferredWidth: 18
             Layout.preferredHeight: 18
             radius: 9
-            color: selected ? "#0F6CBD" : "transparent"
+            color: selected ? Theme.accent : "transparent"
             border.width: selected ? 0 : 1
-            border.color: "#C0C0C0"
+            border.color: Theme.border
 
             Text {
                 anchors.centerIn: parent

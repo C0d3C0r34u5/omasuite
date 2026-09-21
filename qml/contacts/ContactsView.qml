@@ -5,7 +5,7 @@ import OmaSuite 1.0
 
 Rectangle {
     id: contactsView
-    color: "#F3F4F6"
+    color: Theme.bg
 
     property int selectedIndex: -1
     property var selectedContact: null
@@ -22,9 +22,9 @@ Rectangle {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 56
-            color: "#FFFFFF"
+            color: Theme.surface
             border.width: 1
-            border.color: "#E0E0E0"
+            border.color: Theme.border
 
             RowLayout {
                 anchors.fill: parent
@@ -36,7 +36,7 @@ Rectangle {
                     text: "Contacts"
                     font.pixelSize: 20
                     font.weight: Font.DemiBold
-                    color: "#1F1F1F"
+                    color: Theme.textPrimary
                 }
 
                 Item { Layout.fillWidth: true }
@@ -60,7 +60,7 @@ Rectangle {
                     onClicked: { contactDialog.reset(); contactDialog.open() }
 
                     background: Rectangle {
-                        color: parent.hovered ? "#0A5CAD" : "#0F6CBD"
+                        color: parent.hovered ? Theme.accentHover : Theme.accent
                         radius: 8
                     }
                     contentItem: Text {
@@ -83,9 +83,9 @@ Rectangle {
             Rectangle {
                 Layout.preferredWidth: 340
                 Layout.fillHeight: true
-                color: "#FFFFFF"
+                color: Theme.surface
                 border.width: 1
-                border.color: "#E0E0E0"
+                border.color: Theme.border
 
                 ListView {
                     id: contactList
@@ -97,14 +97,14 @@ Rectangle {
                     Text {
                         anchors.centerIn: parent
                         text: "No contacts yet"
-                        color: "#999999"
+                        color: Theme.textFaint
                         visible: contactList.count === 0
                     }
 
                     delegate: Rectangle {
                         width: contactList.width
                         height: 64
-                        color: contactList.currentIndex === index ? "#E8F1FB" : "transparent"
+                        color: contactList.currentIndex === index ? Theme.accentLight : "transparent"
 
                         RowLayout {
                             anchors.fill: parent
@@ -116,7 +116,7 @@ Rectangle {
                                 width: 40
                                 height: 40
                                 radius: 20
-                                color: "#0F6CBD"
+                                color: Theme.accent
 
                                 Text {
                                     anchors.centerIn: parent
@@ -135,7 +135,7 @@ Rectangle {
                                     text: model.fullName
                                     font.pixelSize: 14
                                     font.weight: Font.DemiBold
-                                    color: "#1F1F1F"
+                                    color: Theme.textPrimary
                                     elide: Text.ElideRight
                                     Layout.fillWidth: true
                                 }
@@ -143,7 +143,7 @@ Rectangle {
                                 Text {
                                     text: model.email
                                     font.pixelSize: 12
-                                    color: "#888888"
+                                    color: Theme.textFaint
                                     elide: Text.ElideRight
                                     Layout.fillWidth: true
                                 }
@@ -166,7 +166,7 @@ Rectangle {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                color: "#FFFFFF"
+                color: Theme.surface
 
                 ColumnLayout {
                     anchors.fill: parent
@@ -177,7 +177,7 @@ Rectangle {
                         width: 72
                         height: 72
                         radius: 36
-                        color: "#0F6CBD"
+                        color: Theme.accent
 
                         Text {
                             anchors.centerIn: parent
@@ -192,14 +192,14 @@ Rectangle {
                         text: contactsView.selectedContact ? contactsView.selectedContact.fullName : "Select a contact"
                         font.pixelSize: 22
                         font.weight: Font.DemiBold
-                        color: "#1F1F1F"
+                        color: Theme.textPrimary
                         Layout.fillWidth: true
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 1
-                        color: "#E0E0E0"
+                        color: Theme.border
                     }
 
                     GridLayout {
@@ -208,14 +208,14 @@ Rectangle {
                         columnSpacing: 12
                         rowSpacing: 12
 
-                        Text { text: "Email"; font.pixelSize: 12; color: "#888888" }
-                        Text { text: contactsView.selectedContact ? contactsView.selectedContact.email : ""; font.pixelSize: 14; color: "#1F1F1F" }
+                        Text { text: "Email"; font.pixelSize: 12; color: Theme.textFaint }
+                        Text { text: contactsView.selectedContact ? contactsView.selectedContact.email : ""; font.pixelSize: 14; color: Theme.textPrimary }
 
-                        Text { text: "Phone"; font.pixelSize: 12; color: "#888888" }
-                        Text { text: contactsView.selectedContact ? contactsView.selectedContact.phone : ""; font.pixelSize: 14; color: "#1F1F1F" }
+                        Text { text: "Phone"; font.pixelSize: 12; color: Theme.textFaint }
+                        Text { text: contactsView.selectedContact ? contactsView.selectedContact.phone : ""; font.pixelSize: 14; color: Theme.textPrimary }
 
-                        Text { text: "Organization"; font.pixelSize: 12; color: "#888888" }
-                        Text { text: contactsView.selectedContact ? contactsView.selectedContact.organization : ""; font.pixelSize: 14; color: "#1F1F1F" }
+                        Text { text: "Organization"; font.pixelSize: 12; color: Theme.textFaint }
+                        Text { text: contactsView.selectedContact ? contactsView.selectedContact.organization : ""; font.pixelSize: 14; color: Theme.textPrimary }
                     }
 
                     Button {
@@ -251,7 +251,7 @@ Rectangle {
             orgField.text = ""
         }
 
-        background: Rectangle { radius: 12; color: "#FFFFFF" }
+        background: Rectangle { radius: 12; color: Theme.surface }
 
         ColumnLayout {
             anchors.fill: parent
@@ -262,7 +262,7 @@ Rectangle {
                 text: "New contact"
                 font.pixelSize: 18
                 font.weight: Font.DemiBold
-                color: "#1F1F1F"
+                color: Theme.textPrimary
             }
 
             RowLayout { Layout.fillWidth: true; spacing: 8
@@ -291,7 +291,7 @@ Rectangle {
                     }
 
                     background: Rectangle {
-                        color: parent.enabled ? (parent.hovered ? "#0A5CAD" : "#0F6CBD") : "#B0B0B0"
+                        color: parent.enabled ? (parent.hovered ? Theme.accentHover : Theme.accent) : Theme.accentDisabled
                         radius: 8
                     }
                     contentItem: Text {
