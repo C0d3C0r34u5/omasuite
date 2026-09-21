@@ -94,6 +94,7 @@ Rectangle {
 
             Menu {
                 title: "File"
+                implicitWidth: 220
                 delegate: menuItemDelegate
                 background: Rectangle { color: Theme.surface; border.color: Theme.border; radius: 4 }
                 Action { text: "New Message"; onTriggered: mailView.openCompose() }
@@ -104,6 +105,7 @@ Rectangle {
 
             Menu {
                 title: "View"
+                implicitWidth: 220
                 delegate: menuItemDelegate
                 background: Rectangle { color: Theme.surface; border.color: Theme.border; radius: 4 }
                 Action { text: "Mail"; onTriggered: main.navIndex = 0 }
@@ -115,6 +117,7 @@ Rectangle {
 
             Menu {
                 title: "Help"
+                implicitWidth: 220
                 delegate: menuItemDelegate
                 background: Rectangle { color: Theme.surface; border.color: Theme.border; radius: 4 }
                 Action { text: "About OmaSuite"; onTriggered: aboutDialog.open() }
