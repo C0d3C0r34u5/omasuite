@@ -120,6 +120,7 @@ void OAuth2Manager::startFlow(const QString &provider, const QString &email,
     }
 
     m_handler = new QOAuthHttpServerReplyHandler(0, this);
+    m_handler->setCallbackHost(QStringLiteral("localhost"));
     m_flow->setReplyHandler(m_handler);
 
     connect(m_flow, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser,
