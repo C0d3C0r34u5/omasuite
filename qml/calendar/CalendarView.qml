@@ -232,6 +232,11 @@ Rectangle {
                                 onClicked: {
                                     calView.selectedDay = dayDate
                                 }
+                                onDoubleClicked: {
+                                    calView.selectedDay = dayDate
+                                    eventDialog.reset()
+                                    eventDialog.open()
+                                }
                             }
                         }
                     }
