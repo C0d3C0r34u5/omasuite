@@ -3,80 +3,94 @@
 
 #include <QObject>
 #include <QColor>
+#include <QHash>
+#include <QString>
 
-// Exposes the app's color palette to QML and follows the system color scheme
-// (light / dark) automatically.
+class QFileSystemWatcher;
+
+// Exposes the app's color palette to QML.
+//
+// When running on Omarchy, the palette is derived from the active theme's
+// colors.toml (~/.local/state/omarchy/current/theme/colors.toml) and hot-reloads
+// whenever the user changes the theme from the picker, matching the shell. On
+// other systems it falls back to the desktop color scheme (light/dark).
 class Theme : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(bool dark READ dark NOTIFY darkChanged)
+    Q_PROPERTY(bool dark READ dark NOTIFY paletteChanged)
 
-    Q_PROPERTY(QColor accent READ accent CONSTANT)
-    Q_PROPERTY(QColor accentHover READ accentHover CONSTANT)
-    Q_PROPERTY(QColor accentDisabled READ accentDisabled NOTIFY darkChanged)
-    Q_PROPERTY(QColor accentLight READ accentLight NOTIFY darkChanged)
+    Q_PROPERTY(QColor accent READ accent NOTIFY paletteChanged)
+    Q_PROPERTY(QColor accentHover READ accentHover NOTIFY paletteChanged)
+    Q_PROPERTY(QColor accentDisabled READ accentDisabled NOTIFY paletteChanged)
+    Q_PROPERTY(QColor accentLight READ accentLight NOTIFY paletteChanged)
 
-    Q_PROPERTY(QColor bg READ bg NOTIFY darkChanged)
-    Q_PROPERTY(QColor surface READ surface NOTIFY darkChanged)
-    Q_PROPERTY(QColor surfaceAlt READ surfaceAlt NOTIFY darkChanged)
-    Q_PROPERTY(QColor sidebar READ sidebar NOTIFY darkChanged)
-    Q_PROPERTY(QColor sidebarAlt READ sidebarAlt NOTIFY darkChanged)
+    Q_PROPERTY(QColor bg READ bg NOTIFY paletteChanged)
+    Q_PROPERTY(QColor surface READ surface NOTIFY paletteChanged)
+    Q_PROPERTY(QColor surfaceAlt READ surfaceAlt NOTIFY paletteChanged)
+    Q_PROPERTY(QColor sidebar READ sidebar NOTIFY paletteChanged)
+    Q_PROPERTY(QColor sidebarAlt READ sidebarAlt NOTIFY paletteChanged)
 
-    Q_PROPERTY(QColor textPrimary READ textPrimary NOTIFY darkChanged)
-    Q_PROPERTY(QColor textBody READ textBody NOTIFY darkChanged)
-    Q_PROPERTY(QColor textSecondary READ textSecondary NOTIFY darkChanged)
-    Q_PROPERTY(QColor textMuted READ textMuted NOTIFY darkChanged)
-    Q_PROPERTY(QColor textFaint READ textFaint NOTIFY darkChanged)
+    Q_PROPERTY(QColor textPrimary READ textPrimary NOTIFY paletteChanged)
+    Q_PROPERTY(QColor textBody READ textBody NOTIFY paletteChanged)
+    Q_PROPERTY(QColor textSecondary READ textSecondary NOTIFY paletteChanged)
+    Q_PROPERTY(QColor textMuted READ textMuted NOTIFY paletteChanged)
+    Q_PROPERTY(QColor textFaint READ textFaint NOTIFY paletteChanged)
 
-    Q_PROPERTY(QColor border READ border NOTIFY darkChanged)
-    Q_PROPERTY(QColor danger READ danger NOTIFY darkChanged)
-    Q_PROPERTY(QColor hoverOverlay READ hoverOverlay NOTIFY darkChanged)
+    Q_PROPERTY(QColor border READ border NOTIFY paletteChanged)
+    Q_PROPERTY(QColor danger READ danger NOTIFY paletteChanged)
+    Q_PROPERTY(QColor hoverOverlay READ hoverOverlay NOTIFY paletteChanged)
 
-    Q_PROPERTY(QColor star READ star CONSTANT)
-    Q_PROPERTY(QColor eventChip READ eventChip NOTIFY darkChanged)
-    Q_PROPERTY(QColor eventChipText READ eventChipText NOTIFY darkChanged)
-    Q_PROPERTY(QColor eventCard READ eventCard NOTIFY darkChanged)
+    Q_PROPERTY(QColor star READ star NOTIFY paletteChanged)
+    Q_PROPERTY(QColor eventChip READ eventChip NOTIFY paletteChanged)
+    Q_PROPERTY(QColor eventChipText READ eventChipText NOTIFY paletteChanged)
+    Q_PROPERTY(QColor eventCard READ eventCard NOTIFY paletteChanged)
 
 public:
     explicit Theme(QObject *parent = nullptr);
 
-    bool dark() const;
-
-    QColor accent() const { return QColor(QStringLiteral("#0F6CBD")); }
-    QColor accentHover() const { return QColor(QStringLiteral("#0A5CAD")); }
-    QColor accentDisabled() const { return dark() ? QColor(QStringLiteral("#5A5A5A")) : QColor(QStringLiteral("#B0B0B0")); }
-    QColor accentLight() const { return dark() ? QColor(QStringLiteral("#1E3A5F")) : QColor(QStringLiteral("#E8F1FB")); }
-
-    QColor bg() const { return dark() ? QColor(QStringLiteral("#1E1F22")) : QColor(QStringLiteral("#F3F4F6")); }
-    QColor surface() const { return dark() ? QColor(QStringLiteral("#2B2D31")) : QColor(QStringLiteral("#FFFFFF")); }
-    QColor surfaceAlt() const { return dark() ? QColor(QStringLiteral("#313338")) : QColor(QStringLiteral("#F7F7F7")); }
-    QColor sidebar() const { return dark() ? QColor(QStringLiteral("#26272B")) : QColor(QStringLiteral("#ECEEF1")); }
-    QColor sidebarAlt() const { return dark() ? QColor(QStringLiteral("#2E3034")) : QColor(QStringLiteral("#E0E2E6")); }
-
-    QColor textPrimary() const { return dark() ? QColor(QStringLiteral("#ECECEC")) : QColor(QStringLiteral("#1F1F1F")); }
-    QColor textBody() const { return dark() ? QColor(QStringLiteral("#D6D6D6")) : QColor(QStringLiteral("#333333")); }
-    QColor textSecondary() const { return dark() ? QColor(QStringLiteral("#C0C0C0")) : QColor(QStringLiteral("#444444")); }
-    QColor textMuted() const { return dark() ? QColor(QStringLiteral("#9A9A9A")) : QColor(QStringLiteral("#666666")); }
-    QColor textFaint() const { return dark() ? QColor(QStringLiteral("#7E7E7E")) : QColor(QStringLiteral("#888888")); }
-
-    QColor border() const { return dark() ? QColor(QStringLiteral("#3F4248")) : QColor(QStringLiteral("#E0E0E0")); }
-    QColor danger() const { return dark() ? QColor(QStringLiteral("#E0606C")) : QColor(QStringLiteral("#D13438")); }
-    QColor hoverOverlay() const { return dark() ? QColor(255, 255, 255, 15) : QColor(0, 0, 0, 10); }
-
-    QColor star() const { return QColor(QStringLiteral("#F2C811")); }
-    QColor eventChip() const { return dark() ? QColor(QStringLiteral("#2E4A68")) : QColor(QStringLiteral("#D6E7F8")); }
-    QColor eventChipText() const { return dark() ? QColor(QStringLiteral("#9CC3F0")) : QColor(QStringLiteral("#0F5C9E")); }
-    QColor eventCard() const { return dark() ? QColor(QStringLiteral("#33363C")) : QColor(QStringLiteral("#F3F6FA")); }
+    bool dark() const { return m_dark; }
+    QColor accent() const { return m_accent; }
+    QColor accentHover() const { return m_accentHover; }
+    QColor accentDisabled() const { return m_accentDisabled; }
+    QColor accentLight() const { return m_accentLight; }
+    QColor bg() const { return m_bg; }
+    QColor surface() const { return m_surface; }
+    QColor surfaceAlt() const { return m_surfaceAlt; }
+    QColor sidebar() const { return m_sidebar; }
+    QColor sidebarAlt() const { return m_sidebarAlt; }
+    QColor textPrimary() const { return m_textPrimary; }
+    QColor textBody() const { return m_textBody; }
+    QColor textSecondary() const { return m_textSecondary; }
+    QColor textMuted() const { return m_textMuted; }
+    QColor textFaint() const { return m_textFaint; }
+    QColor border() const { return m_border; }
+    QColor danger() const { return m_danger; }
+    QColor hoverOverlay() const { return m_hoverOverlay; }
+    QColor star() const { return m_star; }
+    QColor eventChip() const { return m_eventChip; }
+    QColor eventChipText() const { return m_eventChipText; }
+    QColor eventCard() const { return m_eventCard; }
 
 signals:
-    void darkChanged();
+    void paletteChanged();
 
 private slots:
-    void refresh();
+    void reload();
 
 private:
-    Q_DISABLE_COPY(Theme)
+    void setupWatch();
+    QString resolve(const QStringList &keys) const;
+
+    QFileSystemWatcher *m_watcher = nullptr;
+    QHash<QString, QString> m_colors;
+
+    bool m_dark = false;
+    QColor m_accent, m_accentHover, m_accentDisabled, m_accentLight;
+    QColor m_bg, m_surface, m_surfaceAlt, m_sidebar, m_sidebarAlt;
+    QColor m_textPrimary, m_textBody, m_textSecondary, m_textMuted, m_textFaint;
+    QColor m_border, m_danger, m_hoverOverlay;
+    QColor m_star, m_eventChip, m_eventChipText, m_eventCard;
 };
 
 #endif // THEME_H
